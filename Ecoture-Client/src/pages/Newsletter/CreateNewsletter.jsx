@@ -3,7 +3,7 @@ import EmailEditor from 'react-email-editor';
 import sampleDesign from './sampleDesign.json';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
-import http from 'utils/Http';
+import http from 'utils/http';
 
 function CreateNewsletter() {
   const navigate = useNavigate();
