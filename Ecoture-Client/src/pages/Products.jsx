@@ -107,12 +107,14 @@ function Products({ onAddProductClick }) {
   }, [categoryName]);
 
   useEffect(() => {
-    http
-      .get('/order')
-      .then((res) => setOrders(res.data))
-      .catch()
-      .finally();
-  }, []);
+    if (user) {
+      http
+        .get('/order')
+        .then((res) => setOrders(res.data))
+        .catch()
+        .finally();
+    }
+  }, [user]);
 
   const getProducts = () => {
     http
