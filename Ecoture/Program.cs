@@ -64,21 +64,23 @@ IMapper mapper = mappingConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 //  Add CORS policy
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-if (allowedOrigins == null || allowedOrigins.Length == 0)
-{
-    throw new Exception("AllowedOrigins is required for CORS policy.");
-}
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        policy =>
+    options.AddDefaultPolicy(policy =>
+    {
+        if (allowedOrigins.Length == 0)
+        {
+            policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+        else
         {
             policy.WithOrigins(allowedOrigins)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
-        });
+        }
+    });
 });
 
 //  Configure Swagger
