@@ -33,7 +33,9 @@ instance.interceptors.response.use(
   function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    if (error.response.status === 401 || error.response.status === 403) {
+    const url = error.config?.url || '';
+    const isAuthManagement = url.includes('edit-profile') || url.includes('login') || url.includes('register');
+    if ((error.response.status === 401 || error.response.status === 403) && !isAuthManagement) {
       localStorage.clear();
       window.location = '/login';
     }

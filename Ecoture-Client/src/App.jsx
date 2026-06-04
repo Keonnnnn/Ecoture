@@ -94,52 +94,8 @@ function App() {
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
-      if (isFirstLoad.current) {
-        isFirstLoad.current = false; // Skip the first load call
-        return; // Don't call the API for the first user set
-      }
-
-      // Detect if a new login occurred
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (storedUser?.userId !== user.userId) {
-        isFirstLoad.current = true; // Treat this as a new "first load"
-        return; // Skip API call for the new login
-      }
-
-      try {
-        const updateUser = async () => {
-          const updateData = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            mobileNo: user.mobileNo,
-            dateofBirth: user.dateofBirth,
-            pfpURL: user.pfpURL,
-            is2FAEnabled: user.is2FAEnabled,
-            isEmailVerified: user.isEmailVerified,
-            isPhoneVerified: user.isPhoneVerified,
-            mfaMethods: user.mfaMethods,
-          };
-
-          const res = await http.post('/user/edit-profile', updateData);
-
-          if (res.data.user) {
-            // Update localStorage with the returned user data
-            const updatedUser = {
-              ...user,
-              ...res.data.user,
-            };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            setLoading(false);
-          }
-        };
-        updateUser();
-      } catch (err) {
-        console.error('Failed to update user profile:', err);
-      }
     } else {
       localStorage.removeItem('user');
-      isFirstLoad.current = true; // Reset the first load tracker
     }
   }, [user]);
 
