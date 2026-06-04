@@ -359,6 +359,19 @@ namespace Ecoture
                     throw new InvalidOperationException("Admin email or password is not configured.");
                 }
 
+                // Seed membership tiers if not present
+                if (!await context.Memberships.AnyAsync())
+                {
+                    context.Memberships.AddRange(
+                        new Membership { MembershipId = 1, Tier = MembershipTiers.None, SpendingRequired = 0, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+                        new Membership { MembershipId = 2, Tier = MembershipTiers.Bronze, SpendingRequired = 100, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+                        new Membership { MembershipId = 3, Tier = MembershipTiers.Silver, SpendingRequired = 500, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+                        new Membership { MembershipId = 4, Tier = MembershipTiers.Gold, SpendingRequired = 1000, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+                    );
+                    await context.SaveChangesAsync();
+                    Console.WriteLine("Membership tiers seeded.");
+                }
+
                 // Check if any users exist in the database
                 if (!await context.Users.AnyAsync())
                 {
