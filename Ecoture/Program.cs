@@ -153,11 +153,21 @@ app.Use(async (context, next) =>
         bool originAllowed = allowedOrigins.Length == 0 || allowedOrigins.Contains(origin);
         if (originAllowed)
         {
-            context.Response.Headers["Access-Control-Allow-Origin"] = origin;
-            context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
-            context.Response.Headers["Vary"] = "Origin";
+            // OnStarting runs just before the first byte is written — headers set here survive
+            // auth challenges (JwtBearer) that would otherwise overwrite our earlier assignments.
+            context.Response.OnStarting(() =>
+            {
+                context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+                context.Response.Headers["Vary"] = "Origin";
+                return Task.CompletedTask;
+            });
+
             if (context.Request.Method == "OPTIONS")
             {
+                context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+                context.Response.Headers["Vary"] = "Origin";
                 context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH";
                 context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Requested-With, X-SignalR-User-Agent";
                 context.Response.Headers["Access-Control-Max-Age"] = "86400";
