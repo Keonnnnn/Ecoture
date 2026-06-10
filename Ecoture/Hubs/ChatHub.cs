@@ -10,7 +10,7 @@ namespace Ecoture.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            string userId = Context.ConnectionId; // Use Connection ID as default
+            string userId = Context.ConnectionId;
             if (Context.GetHttpContext().Request.Query.ContainsKey("username"))
             {
                 userId = Context.GetHttpContext().Request.Query["username"];
@@ -18,9 +18,14 @@ namespace Ecoture.Hubs
 
             userConnections[userId] = Context.ConnectionId;
 
-            await Clients.Others.SendAsync("ReceiveMessage", "System", $"{userId} connected");
-            await Clients.Others.SendAsync("Connections", userConnections.Keys);
-            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Admin", "Hi, welcome to Ecoture live chat. How may I help you today?");
+            // Send updated list to ALL clients including the one just connected
+            await Clients.All.SendAsync("Connections", userConnections.Keys);
+
+            // Welcome message only for non-admin users
+            if (userId != "Admin")
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Admin", "Hi, welcome to Ecoture live chat. How may I help you today?");
+            }
 
             await base.OnConnectedAsync();
         }

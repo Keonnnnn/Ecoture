@@ -26,9 +26,10 @@ const AdminChat = () => {
     setUsers(storedUsers);
   }, []);
 
-  // Create connection ONCE — not on targetUser change
+  // Create connection ONCE and register handlers BEFORE calling start()
+  // so the Connections event from OnConnectedAsync is never missed
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder()
+    const conn = new signalR.HubConnectionBuilder()
       .withUrl(
         `${import.meta.env.VITE_API_BASE_URL}/chatHub?username=${user}`,
         { withCredentials: true }
@@ -36,29 +37,7 @@ const AdminChat = () => {
       .withAutomaticReconnect()
       .build();
 
-    newConnection
-      .start()
-      .then(() => console.log('✅ Admin Connected to SignalR'))
-      .catch((err) => console.error('⚠️ Connection error:', err));
-
-    setConnection(newConnection);
-
-    return () => {
-      newConnection.off('ReceiveMessage');
-      newConnection.off('Connections');
-      if (newConnection.state !== signalR.HubConnectionState.Disconnected) {
-        newConnection
-          .stop()
-          .catch((err) => console.error('⚠️ Error stopping connection:', err));
-      }
-    };
-  }, []);
-
-  // Register handlers once connection is ready
-  useEffect(() => {
-    if (!connection) return;
-
-    const receiveHandler = (sender, receivedMessage) => {
+    conn.on('ReceiveMessage', (sender, receivedMessage) => {
       if (sender === 'System' || sender === 'Admin') return;
       const timestamp = new Date();
 
@@ -93,21 +72,28 @@ const AdminChat = () => {
             ? (prev[sender] || 0) + 1
             : prev[sender] || 0,
       }));
-    };
+    });
 
-    const connectionsHandler = (connections) => {
+    conn.on('Connections', (connections) => {
       console.log('🔄 Online Users:', connections);
-      setOnlineUsers(connections);
-    };
+      setOnlineUsers(Array.from(connections));
+    });
 
-    connection.on('ReceiveMessage', receiveHandler);
-    connection.on('Connections', connectionsHandler);
+    conn
+      .start()
+      .then(() => console.log('✅ Admin Connected to SignalR'))
+      .catch((err) => console.error('⚠️ Connection error:', err));
+
+    setConnection(conn);
 
     return () => {
-      connection.off('ReceiveMessage', receiveHandler);
-      connection.off('Connections', connectionsHandler);
+      conn.off('ReceiveMessage');
+      conn.off('Connections');
+      if (conn.state !== signalR.HubConnectionState.Disconnected) {
+        conn.stop().catch((err) => console.error('⚠️ Error stopping connection:', err));
+      }
     };
-  }, [connection]);
+  }, []);
 
   const sendMessage = async () => {
     if (connection && targetUser.trim() !== '') {
