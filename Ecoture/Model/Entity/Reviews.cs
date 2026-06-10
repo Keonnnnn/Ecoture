@@ -21,7 +21,7 @@ namespace Ecoture.Model.Entity
         [Range(1, 5)]
         public int Rating { get; set; } // Rating (1-5)
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Timestamp
 
         // Navigation Properties

@@ -20,10 +20,10 @@ namespace Ecoture.Model.Request
         [RegularExpression(@"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$", ErrorMessage = "At least 1 digit, 1 uppercase letter, 1 lowercase letter, 1 special character, no spaces and between 8 to 15 characters")]
         public string Password { get; set; } = string.Empty;
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime UpdatedAt { get; set; }
     }
 }

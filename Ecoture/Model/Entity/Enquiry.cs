@@ -24,10 +24,10 @@ namespace Ecoture.Model.Entity
 
 		public EnquiryStatus status { get; set; } = EnquiryStatus.Open; 
 
-		[Column(TypeName = "datetime")]
+		[Column(TypeName = "timestamp with time zone")]
 		public DateTime createdAt { get; set; } 
 
-		[Column(TypeName = "datetime")]
+		[Column(TypeName = "timestamp with time zone")]
 		public DateTime updatedAt { get; set; } 
 
 		public ICollection<Response>? Responses { get; set; } 

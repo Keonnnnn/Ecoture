@@ -15,7 +15,7 @@ namespace Ecoture.Model.Entity
 
         public int PointsUsed { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime RedemptionDate { get; set; }
 
         [Required]

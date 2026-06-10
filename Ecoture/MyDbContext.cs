@@ -24,7 +24,7 @@ namespace Ecoture
                 {
                     throw new Exception("Database connection string is missing in appsettings.json.");
                 }
-                optionsBuilder.UseMySQL(connectionString);
+                optionsBuilder.UseNpgsql(connectionString);
             }
         }
 
@@ -208,11 +208,11 @@ namespace Ecoture
             // ✅ Configure timestamps with default values
             modelBuilder.Entity<Product>()
                 .Property(p => p.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasDefaultValueSql("NOW()");
 
             modelBuilder.Entity<Product>()
                 .Property(p => p.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasDefaultValueSql("NOW()")
                 .ValueGeneratedOnAddOrUpdate();
 
             // ✅ Configure indexes for performance optimization

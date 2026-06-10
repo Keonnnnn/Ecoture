@@ -35,7 +35,7 @@ namespace Ecoture.Model.Entity
         [MaxLength(255)]
         public string? PfpURL { get; set; } 
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime LastLogin { get; set; }
 
         public bool Is2FAEnabled { get; set; } = false;
@@ -62,13 +62,13 @@ namespace Ecoture.Model.Entity
 
         public bool DeleteRequested { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime? DeleteRequestedAt { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime UpdatedAt { get; set; }
 
         public Membership Membership { get; set; }

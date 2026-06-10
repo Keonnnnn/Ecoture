@@ -17,9 +17,9 @@ builder.Services.AddSignalR(options =>
     options.KeepAliveInterval = TimeSpan.FromSeconds(10); 
 });
 
-//  Configure Database Context with MySQL
+//  Configure Database Context with PostgreSQL
 builder.Services.AddDbContext<MyDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("MyConnection"))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("MyConnection"))
 );
 builder.Services.AddDistributedMemoryCache();
 
@@ -112,6 +112,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddTransient<IUserManager, UserManager>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddSingleton<ISmsService, SmsService>();
+builder.Services.AddHostedService<DbKeepaliveService>();
 
 var app = builder.Build();
 
@@ -144,10 +145,10 @@ if (app.Environment.IsDevelopment())
 
 // Railway handles SSL termination - no need for HTTPS redirection
 // app.UseHttpsRedirection();
-app.UseCors();
 app.UseStaticFiles();
-app.UseAuthentication();
 app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseEndpoints(endpoints =>

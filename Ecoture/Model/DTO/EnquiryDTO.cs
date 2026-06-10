@@ -1,6 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Ocsp;
-
-namespace Ecoture.Model.DTO
+﻿namespace Ecoture.Model.DTO
 {
 	public class EnquiryDTO
 	{

@@ -16,10 +16,10 @@ namespace Ecoture.Model.Entity
         [MaxLength(50)]
         public string TransactionType { get; set; } = string.Empty; // e.g., "Referral", "Order", "Review"
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime ExpiryDate { get; set; }
 
         public int? RewardId { get; set; }

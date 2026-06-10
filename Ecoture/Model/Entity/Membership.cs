@@ -13,10 +13,10 @@ namespace Ecoture.Model.Entity
 
         public decimal SpendingRequired { get; set; } = 0.00m;
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime UpdatedAt { get; set; }
     }
 }

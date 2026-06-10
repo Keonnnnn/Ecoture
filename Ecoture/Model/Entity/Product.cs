@@ -34,10 +34,10 @@ namespace Ecoture.Model.Entity
         [MaxLength(255)]
         public string? ImageFile { get; set; } // URL or filename for the product image
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Auto-assign default value
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Auto-assign default value
 
         // Foreign key property for User

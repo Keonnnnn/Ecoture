@@ -17,10 +17,10 @@ namespace Ecoture.Model.Entity
         [MaxLength(20)]
         public string? ImageFile { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime CreatedAt { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime UpdatedAt { get; set; }
 
         public int UserId { get; set; }

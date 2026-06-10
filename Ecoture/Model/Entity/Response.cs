@@ -19,7 +19,7 @@ namespace Ecoture.Model.Entity
 		[Required]
 		public string message { get; set; } = string.Empty; 
 
-		[Column(TypeName = "datetime")]
+		[Column(TypeName = "timestamp with time zone")]
 		public DateTime responseDate { get; set; } 
 	}
 }

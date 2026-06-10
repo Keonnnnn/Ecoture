@@ -13,7 +13,7 @@ namespace Ecoture.Model.Entity
         [ForeignKey(nameof(refereeUser))]
         public int refereeUserId { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "timestamp with time zone")]
         public DateTime referralDate { get; set; }
 
         // Navigation properties
