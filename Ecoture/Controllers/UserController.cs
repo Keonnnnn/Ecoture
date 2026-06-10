@@ -471,7 +471,8 @@ namespace Ecoture.Controllers
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user.UserId);
 
             // Create password reset URL (you can add token expiration here)
-            var resetUrl = $"http://localhost:3000/reset-password?token={resetToken.Token}";
+            var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:3000";
+            var resetUrl = $"{frontendUrl}/reset-password?token={resetToken.Token}";
 
             // Send the password reset email (e.g., using SendGrid)
             await _emailService.SendAsync(user.Email, "Password Reset Request", $"Click the link to reset your password: {resetUrl}");
