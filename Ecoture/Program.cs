@@ -50,6 +50,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(secret)
             ),
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                var origin = context.HttpContext.Request.Headers["Origin"].ToString();
+                if (!string.IsNullOrEmpty(origin))
+                {
+                    context.HttpContext.Response.Headers["Access-Control-Allow-Origin"] = origin;
+                    context.HttpContext.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+                    Console.WriteLine($"[CORS-JWT] OnChallenge fired, set ACAO for {context.HttpContext.Request.Path} origin={origin}");
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 //  Add this line to enable authorization services
@@ -144,12 +158,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Debug: log CORS state for every request (remove after fix is confirmed)
+// Debug: log CORS state (remove after fix is confirmed)
 app.Use(async (context, next) =>
 {
-    Console.WriteLine($"[CORS-DBG] {context.Request.Method} {context.Request.Path} origin={context.Request.Headers.Origin} allowedOrigins=[{string.Join(",", allowedOrigins)}]");
+    var origin = context.Request.Headers["Origin"].ToString();
+    Console.WriteLine($"[CORS-DBG] {context.Request.Method} {context.Request.Path} origin={origin} allowed=[{string.Join(",", allowedOrigins)}]");
+    context.Response.OnStarting(() =>
+    {
+        Console.WriteLine($"[CORS-FINAL] {context.Request.Method} {context.Request.Path} status={context.Response.StatusCode} ACAO={context.Response.Headers["Access-Control-Allow-Origin"]}");
+        return Task.CompletedTask;
+    });
     await next();
-    Console.WriteLine($"[CORS-DBG] => status={context.Response.StatusCode} ACAO={context.Response.Headers["Access-Control-Allow-Origin"]}");
 });
 
 // Railway handles SSL termination - no need for HTTPS redirection
