@@ -35,7 +35,7 @@ instance.interceptors.response.use(
     // Do something with response error
     const url = error.config?.url || '';
     const isAuthManagement = url.includes('edit-profile') || url.includes('login') || url.includes('register');
-    if ((error.response.status === 401 || error.response.status === 403) && !isAuthManagement) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403) && !isAuthManagement) {
       localStorage.clear();
       window.location = '/login';
     }

@@ -144,49 +144,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Explicitly handle CORS preflight before all other middleware
-app.Use(async (context, next) =>
-{
-    var origin = context.Request.Headers["Origin"].ToString();
-    if (!string.IsNullOrEmpty(origin))
-    {
-        bool originAllowed = allowedOrigins.Length == 0 || allowedOrigins.Contains(origin);
-        if (originAllowed)
-        {
-            // OnStarting runs just before the first byte is written — headers set here survive
-            // auth challenges (JwtBearer) that would otherwise overwrite our earlier assignments.
-            context.Response.OnStarting(() =>
-            {
-                context.Response.Headers["Access-Control-Allow-Origin"] = origin;
-                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
-                context.Response.Headers["Vary"] = "Origin";
-                return Task.CompletedTask;
-            });
-
-            if (context.Request.Method == "OPTIONS")
-            {
-                context.Response.Headers["Access-Control-Allow-Origin"] = origin;
-                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
-                context.Response.Headers["Vary"] = "Origin";
-                context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH";
-                context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Requested-With, X-SignalR-User-Agent";
-                context.Response.Headers["Access-Control-Max-Age"] = "86400";
-                context.Response.StatusCode = 204;
-                return;
-            }
-        }
-    }
-    await next();
-});
-
 // Railway handles SSL termination - no need for HTTPS redirection
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors(corsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/chatHub").RequireCors(corsPolicyName);
 
 
 app.Run();
