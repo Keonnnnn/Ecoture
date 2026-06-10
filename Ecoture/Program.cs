@@ -158,6 +158,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler(errApp => errApp.Run(async context =>
+{
+    var origin = context.Request.Headers["Origin"].ToString();
+    if (!string.IsNullOrEmpty(origin))
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+    }
+    context.Response.StatusCode = 500;
+    await context.Response.WriteAsync("Internal Server Error");
+}));
+
 // Debug: log CORS state (remove after fix is confirmed)
 app.Use(async (context, next) =>
 {

@@ -26,43 +26,41 @@ namespace Ecoture.Controllers
         [HttpPost, Authorize]
         public IActionResult AddToCart([FromBody] AddToCartRequest request)
         {
-            if (request == null)
+            try
             {
-                return BadRequest(new { message = "Invalid request. Please provide cart details." });
-            }
-            if (request.ProductId <= 0)
-            {
-                return BadRequest(new { message = "Invalid product ID." });
-            }
-            if (string.IsNullOrEmpty(request.Color))
-            {
-                return BadRequest(new { message = "Color is required." });
-            }
-            if (string.IsNullOrEmpty(request.Size))
-            {
-                return BadRequest(new { message = "Size is required." });
-            }
+                if (request == null)
+                    return BadRequest(new { message = "Invalid request. Please provide cart details." });
+                if (request.ProductId <= 0)
+                    return BadRequest(new { message = "Invalid product ID." });
+                if (string.IsNullOrEmpty(request.Color))
+                    return BadRequest(new { message = "Color is required." });
+                if (string.IsNullOrEmpty(request.Size))
+                    return BadRequest(new { message = "Size is required." });
 
+                int userId = GetUserId();
 
-            int userId = GetUserId();
+                var existingCartItem = _context.Carts
+                    .FirstOrDefault(c => c.UserId == userId && c.ProductId == request.ProductId && c.Color == request.Color && c.Size == request.Size);
 
-            // ✅ Check if the item already exists in the cart (same product, size, and color)
-            var existingCartItem = _context.Carts
-                .FirstOrDefault(c => c.UserId == userId && c.ProductId == request.ProductId && c.Color == request.Color && c.Size == request.Size);
+                if (existingCartItem != null)
+                {
+                    existingCartItem.Quantity += request.Quantity;
+                }
+                else
+                {
+                    Cart newCartItem = _mapper.Map<Cart>(request);
+                    newCartItem.UserId = userId;
+                    _context.Carts.Add(newCartItem);
+                }
 
-            if (existingCartItem != null)
-            {
-                existingCartItem.Quantity += request.Quantity; // Increase quantity
+                _context.SaveChanges();
+                return Ok(new { message = "Item added to cart successfully!" });
             }
-            else
+            catch (Exception ex)
             {
-                Cart newCartItem = _mapper.Map<Cart>(request);
-                newCartItem.UserId = userId;
-                _context.Carts.Add(newCartItem);
+                Console.WriteLine($"[CART-ERROR] {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new { message = "Failed to add to cart.", error = ex.Message });
             }
-
-            _context.SaveChanges();
-            return Ok(new { message = "Item added to cart successfully!" });
         }
 
         [HttpGet, Authorize]
