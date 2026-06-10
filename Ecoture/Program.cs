@@ -159,7 +159,7 @@ app.Use(async (context, next) =>
             if (context.Request.Method == "OPTIONS")
             {
                 context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH";
-                context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Requested-With";
+                context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Requested-With, X-SignalR-User-Agent";
                 context.Response.Headers["Access-Control-Max-Age"] = "86400";
                 context.Response.StatusCode = 204;
                 return;
