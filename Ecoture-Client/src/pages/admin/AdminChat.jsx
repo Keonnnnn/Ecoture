@@ -14,19 +14,24 @@ const AdminChat = () => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
 
+  // Ref so message handler closure always sees current targetUser
+  const targetUserRef = useRef(targetUser);
+  useEffect(() => {
+    targetUserRef.current = targetUser;
+  }, [targetUser]);
+
   useEffect(() => {
     const storedUsers =
       JSON.parse(localStorage.getItem('adminChatUsers')) || [];
     setUsers(storedUsers);
   }, []);
 
+  // Create connection ONCE — not on targetUser change
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
         `${import.meta.env.VITE_API_BASE_URL}/chatHub?username=${user}`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       )
       .withAutomaticReconnect()
       .build();
@@ -36,62 +41,70 @@ const AdminChat = () => {
       .then(() => console.log('✅ Admin Connected to SignalR'))
       .catch((err) => console.error('⚠️ Connection error:', err));
 
-    newConnection.on('ReceiveMessage', (sender, receivedMessage) => {
-      const timestamp = new Date();
-      setMessages((prevMessages) => {
-        const updatedMessages = {
-          ...prevMessages,
-          [sender]: [
-            ...(prevMessages[sender] || []),
-            { user: sender, message: receivedMessage, timestamp },
-          ],
-        };
-        localStorage.setItem(
-          `chatMessages_${sender}`,
-          JSON.stringify(updatedMessages[sender])
-        );
-        return updatedMessages;
-      });
-
-      setUsers((prevUsers) => {
-        if (!prevUsers.includes(sender)) {
-          const updatedUsers = [...prevUsers, sender];
-          localStorage.setItem('adminChatUsers', JSON.stringify(updatedUsers));
-          return updatedUsers;
-        }
-        return prevUsers;
-      });
-
-      if (targetUser !== sender) {
-        setUnreadCounts((prev) => ({
-          ...prev,
-          [sender]: (prev[sender] || 0) + 1,
-        }));
-      }
-    });
-
     setConnection(newConnection);
 
     return () => {
       newConnection.off('ReceiveMessage');
-      if (newConnection.state === signalR.HubConnectionState.Connected) {
+      newConnection.off('Connections');
+      if (newConnection.state !== signalR.HubConnectionState.Disconnected) {
         newConnection
           .stop()
           .catch((err) => console.error('⚠️ Error stopping connection:', err));
       }
     };
-  }, [targetUser, user]);
+  }, []);
 
+  // Register handlers once connection is ready
   useEffect(() => {
     if (!connection) return;
+
+    const receiveHandler = (sender, receivedMessage) => {
+      if (sender === 'System' || sender === 'Admin') return;
+      const timestamp = new Date();
+
+      setMessages((prev) => {
+        const updated = {
+          ...prev,
+          [sender]: [
+            ...(prev[sender] || []),
+            { user: sender, message: receivedMessage, timestamp },
+          ],
+        };
+        localStorage.setItem(
+          `chatMessages_${sender}`,
+          JSON.stringify(updated[sender])
+        );
+        return updated;
+      });
+
+      setUsers((prev) => {
+        if (!prev.includes(sender)) {
+          const next = [...prev, sender];
+          localStorage.setItem('adminChatUsers', JSON.stringify(next));
+          return next;
+        }
+        return prev;
+      });
+
+      setUnreadCounts((prev) => ({
+        ...prev,
+        [sender]:
+          targetUserRef.current !== sender
+            ? (prev[sender] || 0) + 1
+            : prev[sender] || 0,
+      }));
+    };
 
     const connectionsHandler = (connections) => {
       console.log('🔄 Online Users:', connections);
       setOnlineUsers(connections);
     };
 
+    connection.on('ReceiveMessage', receiveHandler);
     connection.on('Connections', connectionsHandler);
+
     return () => {
+      connection.off('ReceiveMessage', receiveHandler);
       connection.off('Connections', connectionsHandler);
     };
   }, [connection]);
@@ -100,10 +113,10 @@ const AdminChat = () => {
     if (connection && targetUser.trim() !== '') {
       await connection.send('SendMessageToUser', targetUser, user, message);
       const timestamp = new Date();
-      setMessages((prevMessages) => ({
-        ...prevMessages,
+      setMessages((prev) => ({
+        ...prev,
         [targetUser]: [
-          ...(prevMessages[targetUser] || []),
+          ...(prev[targetUser] || []),
           { user, message, timestamp },
         ],
       }));
@@ -115,10 +128,16 @@ const AdminChat = () => {
 
   const handleUserSelect = (usr) => {
     setTargetUser(usr);
-    setUnreadCounts((prev) => ({
-      ...prev,
-      [usr]: 0,
-    }));
+    setUnreadCounts((prev) => ({ ...prev, [usr]: 0 }));
+    // Load from localStorage if messages not already in state
+    setMessages((prev) => {
+      if (!prev[usr] || prev[usr].length === 0) {
+        const stored =
+          JSON.parse(localStorage.getItem(`chatMessages_${usr}`)) || [];
+        if (stored.length > 0) return { ...prev, [usr]: stored };
+      }
+      return prev;
+    });
   };
 
   const deleteChat = (usr) => {
@@ -126,22 +145,15 @@ const AdminChat = () => {
       window.confirm(`Are you sure you want to delete chat history for ${usr}?`)
     ) {
       localStorage.removeItem(`chatMessages_${usr}`);
-
       const updatedUsers = users.filter((u) => u !== usr);
       localStorage.setItem('adminChatUsers', JSON.stringify(updatedUsers));
-
       setUsers(updatedUsers);
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        delete updatedMessages[usr];
-        return updatedMessages;
+      setMessages((prev) => {
+        const next = { ...prev };
+        delete next[usr];
+        return next;
       });
-
-      if (targetUser === usr) {
-        setTargetUser('');
-      }
-
-      console.log(`🗑️ Deleted chat history for ${usr}`);
+      if (targetUser === usr) setTargetUser('');
     }
   };
 
@@ -150,7 +162,7 @@ const AdminChat = () => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, targetUser]);
 
   return (
     <div className="admin-chat-container">
@@ -203,7 +215,7 @@ const AdminChat = () => {
       ) : (
         <div className="chat-window">
           <h3>Chat with {targetUser}</h3>
-          <div className="chat-messages">
+          <div className="chat-messages" ref={chatBoxRef}>
             {(messages[targetUser] || []).map((msg, index) => (
               <div
                 key={index}
@@ -227,6 +239,7 @@ const AdminChat = () => {
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Type a message..."
               />
               <button onClick={sendMessage}>Send</button>
