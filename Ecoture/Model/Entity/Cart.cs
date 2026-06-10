@@ -37,6 +37,6 @@ namespace Ecoture.Model.Entity
         [Range(1, 100)]
         public int Quantity { get; set; } = 1; // Default quantity is 1
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now; // Timestamp
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
