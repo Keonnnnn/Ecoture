@@ -121,6 +121,8 @@ function ProductDetail() {
 
       if (response.status === 200) {
         toast.success('Item added to cart successfully!');
+        window.dispatchEvent(new Event('cartUpdated'));
+        navigate(-1);
       } else {
         toast.error('Failed to add item to cart.');
       }

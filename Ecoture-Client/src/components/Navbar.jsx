@@ -86,6 +86,19 @@ function Navbar() {
 
   // In Navbar.jsx
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
+
+  const fetchCartCount = async () => {
+    try {
+      if (user) {
+        const response = await http.get('/cart');
+        const total = response.data.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(total);
+      }
+    } catch (error) {
+      console.error('Error fetching cart count:', error);
+    }
+  };
 
   const fetchWishlistCount = async () => {
     try {
@@ -99,6 +112,16 @@ function Navbar() {
       console.error('Error fetching wishlist count:', error);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchCartCount();
+      window.addEventListener('cartUpdated', fetchCartCount);
+      return () => window.removeEventListener('cartUpdated', fetchCartCount);
+    } else {
+      setCartCount(0);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -225,7 +248,13 @@ function Navbar() {
             {/* Cart Icon */}
             {user && !adminRoles.includes(user?.role) && (
               <Link to="/cart" className="nav-link">
-                <ShoppingCartOutlinedIcon />
+                <Badge
+                  badgeContent={cartCount}
+                  color="primary"
+                  invisible={cartCount === 0}
+                >
+                  <ShoppingCartOutlinedIcon />
+                </Badge>
               </Link>
             )}
 
