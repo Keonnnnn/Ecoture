@@ -94,7 +94,7 @@ namespace Ecoture.Controllers
             try
             {
                 int userId = GetUserId();
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
 
                 // Create a new address for the logged-in user
                 var newAddress = new Address()
@@ -156,7 +156,7 @@ namespace Ecoture.Controllers
                     existingAddress.ImageFile = address.ImageFile;
                 }
 
-                existingAddress.UpdatedAt = DateTime.Now;
+                existingAddress.UpdatedAt = DateTime.UtcNow;
                 _context.SaveChanges();
 
                 return Ok();

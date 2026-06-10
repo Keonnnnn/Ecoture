@@ -22,7 +22,7 @@ namespace Ecoture.Model.Entity
         public int Rating { get; set; } // Rating (1-5)
 
         [Column(TypeName = "timestamp with time zone")]
-        public DateTime CreatedAt { get; set; } = DateTime.Now; // Timestamp
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
         public Product? Product { get; set; }

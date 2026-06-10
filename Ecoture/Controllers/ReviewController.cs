@@ -89,7 +89,7 @@ namespace Ecoture.Controllers
                     UserId = userId,
                     Comment = request.Comment,
                     Rating = request.Rating,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 await _context.Reviews.AddAsync(review); // Add to database
