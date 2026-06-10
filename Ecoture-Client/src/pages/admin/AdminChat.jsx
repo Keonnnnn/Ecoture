@@ -162,6 +162,7 @@ const AdminChat = () => {
               className={`user-item ${targetUser === usr ? 'active' : ''}`}
               onClick={() => handleUserSelect(usr)}
             >
+              <span className="online-dot" />
               {usr}
               {unreadCounts[usr] > 0 && (
                 <span className="new-badge">{unreadCounts[usr]}</span>
@@ -211,10 +212,9 @@ const AdminChat = () => {
                 <br />
                 <span className="message-text">{msg.message}</span>
                 <div className="timestamp">
-                  {new Date(msg.timestamp).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {msg.timestamp
+                    ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : ''}
                 </div>
               </div>
             ))}

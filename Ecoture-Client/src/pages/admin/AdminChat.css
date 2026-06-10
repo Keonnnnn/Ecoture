@@ -238,3 +238,18 @@
   background: #f9f9f9;
   border-radius: 5px;
 }
+
+.online-dot {
+  width: 9px;
+  height: 9px;
+  background-color: #28a745;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.user-item.active .online-dot {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}

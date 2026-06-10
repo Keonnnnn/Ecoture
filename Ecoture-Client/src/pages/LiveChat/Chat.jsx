@@ -76,7 +76,7 @@ const Chat = () => {
                             msg => msg.userId === senderId && msg.message === receivedMessage
                         );
                         if (!isDuplicate) {
-                            const updatedMessages = [...prevMessages, { userId: senderId, message: receivedMessage }];
+                            const updatedMessages = [...prevMessages, { userId: senderId, message: receivedMessage, timestamp: new Date().toISOString() }];
                             localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updatedMessages));
                             return updatedMessages;
                         }
@@ -119,7 +119,7 @@ const Chat = () => {
         if (connection && message.trim() !== "") {
             await connection.send("SendMessage", currentUserId, message);
             setMessages(prevMessages => {
-                const updatedMessages = [...prevMessages, { userId: currentUserId, message }];
+                const updatedMessages = [...prevMessages, { userId: currentUserId, message, timestamp: new Date().toISOString() }];
                 localStorage.setItem(`chatMessages_${currentUserId}`, JSON.stringify(updatedMessages));
                 return updatedMessages;
             });
