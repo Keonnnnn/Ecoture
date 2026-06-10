@@ -144,6 +144,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Debug: log CORS state for every request (remove after fix is confirmed)
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[CORS-DBG] {context.Request.Method} {context.Request.Path} origin={context.Request.Headers.Origin} allowedOrigins=[{string.Join(",", allowedOrigins)}]");
+    await next();
+    Console.WriteLine($"[CORS-DBG] => status={context.Response.StatusCode} ACAO={context.Response.Headers["Access-Control-Allow-Origin"]}");
+});
+
 // Railway handles SSL termination - no need for HTTPS redirection
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -151,7 +159,7 @@ app.UseRouting();
 app.UseCors(corsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+app.MapControllers().RequireCors(corsPolicyName);
 app.MapHub<ChatHub>("/chatHub").RequireCors(corsPolicyName);
 
 
