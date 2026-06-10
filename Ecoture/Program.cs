@@ -64,10 +64,11 @@ IMapper mapper = mappingConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 //  Add CORS policy
+const string corsPolicyName = "AppCors";
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy(corsPolicyName, policy =>
     {
         if (allowedOrigins.Length == 0)
         {
@@ -147,11 +148,11 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors();
+app.UseCors(corsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+app.MapControllers().RequireCors(corsPolicyName);
+app.MapHub<ChatHub>("/chatHub").RequireCors(corsPolicyName);
 
 
 app.Run();
