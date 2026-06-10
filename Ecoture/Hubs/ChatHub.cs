@@ -24,7 +24,14 @@ namespace Ecoture.Hubs
             // Welcome message only for non-admin users
             if (userId != "Admin")
             {
-                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Admin", "Hi, welcome to Ecoture live chat. How may I help you today?");
+                var welcomeMsg = "Hi, welcome to Ecoture live chat. How may I help you today?";
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Admin", welcomeMsg);
+
+                // Mirror welcome to admin so it appears in their chat window for this user
+                if (userConnections.TryGetValue("Admin", out string adminConnId))
+                {
+                    await Clients.Client(adminConnId).SendAsync("AdminMessageSent", userId, welcomeMsg);
+                }
             }
 
             await base.OnConnectedAsync();

@@ -79,6 +79,33 @@ const AdminChat = () => {
       setOnlineUsers(Array.from(connections));
     });
 
+    // Hub mirrors the auto-welcome message back so admin sees it in the chat window
+    conn.on('AdminMessageSent', (targetUsername, msg) => {
+      const timestamp = new Date().toISOString();
+      setMessages((prev) => {
+        const updated = {
+          ...prev,
+          [targetUsername]: [
+            ...(prev[targetUsername] || []),
+            { user: 'Admin', message: msg, timestamp },
+          ],
+        };
+        localStorage.setItem(
+          `chatMessages_${targetUsername}`,
+          JSON.stringify(updated[targetUsername])
+        );
+        return updated;
+      });
+      setUsers((prev) => {
+        if (!prev.includes(targetUsername)) {
+          const next = [...prev, targetUsername];
+          localStorage.setItem('adminChatUsers', JSON.stringify(next));
+          return next;
+        }
+        return prev;
+      });
+    });
+
     conn
       .start()
       .then(() => console.log('✅ Admin Connected to SignalR'))
@@ -89,6 +116,7 @@ const AdminChat = () => {
     return () => {
       conn.off('ReceiveMessage');
       conn.off('Connections');
+      conn.off('AdminMessageSent');
       if (conn.state !== signalR.HubConnectionState.Disconnected) {
         conn.stop().catch((err) => console.error('⚠️ Error stopping connection:', err));
       }
