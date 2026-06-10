@@ -226,7 +226,7 @@ const Reviews = () => {
                 )}
 
                 {/* Show Edit/Delete buttons only to the review owner */}
-                {user && user.id === review.userId && (
+                {user && user.userId === review.userId && (
                   <Box
                     sx={{
                       position: 'absolute',
