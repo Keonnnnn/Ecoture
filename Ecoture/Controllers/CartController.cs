@@ -58,8 +58,8 @@ namespace Ecoture.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CART-ERROR] {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, new { message = "Failed to add to cart.", error = ex.Message });
+                Console.WriteLine($"[CART-ERROR] {ex}");
+                return StatusCode(500, new { message = "Failed to add to cart.", error = ex.Message, inner = ex.InnerException?.Message });
             }
         }
 
