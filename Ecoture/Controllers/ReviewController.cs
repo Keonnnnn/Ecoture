@@ -48,6 +48,7 @@ namespace Ecoture.Controllers
                 {
                     Id = r.Id,
                     ProductId = r.ProductId,
+                    UserId = r.UserId,
                     Comment = r.Comment,
                     Rating = r.Rating,
                     Username = r.User?.FullName ?? "Unknown",
