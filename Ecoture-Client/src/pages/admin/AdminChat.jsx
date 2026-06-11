@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import * as signalR from '@microsoft/signalr';
+import { useMediaQuery } from '@mui/material';
 
 import './AdminChat.css';
 
@@ -13,6 +14,7 @@ const AdminChat = () => {
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Ref so message handler closure always sees current targetUser
   const targetUserRef = useRef(targetUser);
@@ -219,95 +221,104 @@ const AdminChat = () => {
 
   return (
     <div className="admin-chat-container">
-      <div className="sidebar">
-        <h3>Connected Users</h3>
-        {onlineUsers
-          .filter((usr) => usr !== 'Admin' && usr !== 'System')
-          .map((usr, index) => (
-            <div
-              key={index}
-              className={`user-item ${targetUser === usr ? 'active' : ''}`}
-              onClick={() => handleUserSelect(usr)}
-            >
-              <span className="online-dot" />
-              {usr}
-              {unreadCounts[usr] > 0 && (
-                <span className="new-badge">{unreadCounts[usr]}</span>
-              )}
-            </div>
-          ))}
-
-        <h3>Disconnected Chats</h3>
-        {users
-          .filter(
-            (usr) =>
-              !onlineUsers.includes(usr) && usr !== 'Admin' && usr !== 'System'
-          )
-          .map((usr, index) => (
-            <div key={index} className="user-item">
-              <span
-                className={`user-label ${targetUser === usr ? 'active' : ''}`}
+      {/* User list: always visible on desktop; hidden on mobile when a chat is open */}
+      {(!isMobile || !targetUser) && (
+        <div className="sidebar">
+          <h3>Connected Users</h3>
+          {onlineUsers
+            .filter((usr) => usr !== 'Admin' && usr !== 'System')
+            .map((usr, index) => (
+              <div
+                key={index}
+                className={`user-item ${targetUser === usr ? 'active' : ''}`}
                 onClick={() => handleUserSelect(usr)}
               >
-                {usr} (offline)
+                <span className="online-dot" />
+                {usr}
                 {unreadCounts[usr] > 0 && (
                   <span className="new-badge">{unreadCounts[usr]}</span>
                 )}
-              </span>
-              <span className="delete-icon" onClick={() => deleteChat(usr)}>
-                {' '}
-                ❌
-              </span>
-            </div>
-          ))}
-      </div>
-
-      {!targetUser ? (
-        <div className="chat-placeholder">
-          <p>Select a chat to view messages</p>
-        </div>
-      ) : (
-        <div className="chat-window">
-          <h3>Chat with {targetUser}</h3>
-          <div className="chat-messages" ref={chatBoxRef}>
-            {(messages[targetUser] || []).map((msg, index) => (
-              <div
-                key={index}
-                className={`chat-bubble ${msg.user === 'Admin' ? 'admin' : 'user'}`}
-              >
-                <strong>{msg.user}</strong>
-                <br />
-                <span className="message-text">{msg.message}</span>
-                <div className="timestamp">
-                  {msg.timestamp
-                    ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : ''}
-                </div>
               </div>
             ))}
-          </div>
-          {onlineUsers.includes(targetUser) ? (
-            <div className="chat-input">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type a message..."
-              />
-              <button onClick={sendMessage}>Send</button>
-            </div>
-          ) : (
-            <div className="chat-input offline-note">
-              <span
-                style={{ color: 'red', marginRight: '5px', fontSize: '1.1rem' }}
-              >
-                ❗
-              </span>
-              The user is no longer online, you can&apos;t reply to this user.
-            </div>
-          )}
+
+          <h3>Disconnected Chats</h3>
+          {users
+            .filter(
+              (usr) =>
+                !onlineUsers.includes(usr) && usr !== 'Admin' && usr !== 'System'
+            )
+            .map((usr, index) => (
+              <div key={index} className="user-item">
+                <span
+                  className={`user-label ${targetUser === usr ? 'active' : ''}`}
+                  onClick={() => handleUserSelect(usr)}
+                >
+                  {usr} (offline)
+                  {unreadCounts[usr] > 0 && (
+                    <span className="new-badge">{unreadCounts[usr]}</span>
+                  )}
+                </span>
+                <span className="delete-icon" onClick={() => deleteChat(usr)}>
+                  {' '}
+                  ❌
+                </span>
+              </div>
+            ))}
         </div>
+      )}
+
+      {/* Chat area: always visible on desktop; only visible on mobile when a user is selected */}
+      {(!isMobile || targetUser) && (
+        !targetUser ? (
+          <div className="chat-placeholder">
+            <p>Select a chat to view messages</p>
+          </div>
+        ) : (
+          <div className="chat-window">
+            {isMobile && (
+              <button className="back-btn" onClick={() => setTargetUser('')}>
+                ← Back
+              </button>
+            )}
+            <h3>Chat with {targetUser}</h3>
+            <div className="chat-messages" ref={chatBoxRef}>
+              {(messages[targetUser] || []).map((msg, index) => (
+                <div
+                  key={index}
+                  className={`chat-bubble ${msg.user === 'Admin' ? 'admin' : 'user'}`}
+                >
+                  <strong>{msg.user}</strong>
+                  <br />
+                  <span className="message-text">{msg.message}</span>
+                  <div className="timestamp">
+                    {msg.timestamp
+                      ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {onlineUsers.includes(targetUser) ? (
+              <div className="chat-input">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="Type a message..."
+                />
+                <button onClick={sendMessage}>Send</button>
+              </div>
+            ) : (
+              <div className="chat-input offline-note">
+                <span style={{ color: 'red', marginRight: '5px', fontSize: '1.1rem' }}>
+                  ❗
+                </span>
+                The user is no longer online, you can&apos;t reply to this user.
+              </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );
