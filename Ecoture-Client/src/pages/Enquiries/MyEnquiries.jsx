@@ -4,7 +4,7 @@ import http from "utils/http";
 import UserContext from "contexts/UserContext";
 
 const statusColor = { Open: "warning", Closed: "success", InProgress: "info" };
-const statusLabel = { 0: "Open", 1: "Closed", 2: "InProgress" };
+const statusLabel = { Open: "Open", Closed: "Closed", InProgress: "In Progress" };
 
 function MyEnquiries() {
   const { user } = useContext(UserContext);
@@ -51,8 +51,8 @@ function MyEnquiries() {
         <Typography>You have no enquiries yet.</Typography>
       ) : (
         enquiries.map((enq) => {
-          const status = statusLabel[enq.status] ?? "Open";
-          const isOpen = status !== "Closed";
+          const status = statusLabel[enq.status] ?? enq.status ?? "Open";
+          const isOpen = enq.status !== "Closed";
           return (
             <Card key={enq.enquiryId} sx={{ mb: 3, boxShadow: 2, borderRadius: 2 }}>
               <CardContent>
