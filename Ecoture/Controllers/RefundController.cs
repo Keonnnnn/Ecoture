@@ -37,15 +37,21 @@ namespace Ecoture.Controllers
             int userId = GetUserId();
             Console.WriteLine($"User ID from token: {userId}");
 
-            // ✅ Fetch the order item (with order details)
-            var orderItem = _context.OrderItems
-                .Include(o => o.Order)
-                .FirstOrDefault(o => o.Id == requestDto.OrderItemId && o.Order.UserId == userId);
+            // Fetch the order item
+            var orderItem = _context.OrderItems.FirstOrDefault(o => o.Id == requestDto.OrderItemId);
 
             if (orderItem == null)
             {
-                Console.WriteLine($"❌ OrderItemId {requestDto.OrderItemId} not found or not owned by user.");
-                return NotFound(new { message = "Order item not found or not owned by user." });
+                Console.WriteLine($"❌ OrderItemId {requestDto.OrderItemId} not found.");
+                return NotFound(new { message = "Order item not found." });
+            }
+
+            // Verify the order belongs to this user
+            var order = _context.Orders.FirstOrDefault(o => o.Id == orderItem.OrderId && o.UserId == userId);
+            if (order == null)
+            {
+                Console.WriteLine($"❌ Order {orderItem.OrderId} not owned by user {userId}.");
+                return NotFound(new { message = "Order not found or not owned by user." });
             }
 
             // ✅ Create refund request
