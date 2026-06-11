@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import EmailEditor from 'react-email-editor';
-import { Button, CircularProgress, Box, Typography } from '@mui/material';
+import { Button, CircularProgress, Box, TextField, Typography } from '@mui/material';
 import http from 'utils/http';
 
 function EditNewsletter() {
@@ -37,6 +37,7 @@ function EditNewsletter() {
         const payload = {
           IssueTitle: newsletter.issueTitle,
           NewsletterCategory: newsletter.newsletterCategory,
+          DateSent: newsletter.dateSent,
           Template: JSON.stringify(design),
           Html: html,
         };
@@ -57,8 +58,29 @@ function EditNewsletter() {
 
   return (
     <div>
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="h6">Editing: {newsletter.issueTitle}</Typography>
+      <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <TextField
+          label="Newsletter Title"
+          value={newsletter.issueTitle}
+          onChange={(e) => setNewsletter((prev) => ({ ...prev, issueTitle: e.target.value }))}
+          size="small"
+          sx={{ minWidth: 260 }}
+        />
+        <TextField
+          label="Category"
+          value={newsletter.newsletterCategory}
+          onChange={(e) => setNewsletter((prev) => ({ ...prev, newsletterCategory: e.target.value }))}
+          size="small"
+          sx={{ minWidth: 180 }}
+        />
+        <TextField
+          label="Date"
+          type="date"
+          value={newsletter.dateSent ? new Date(newsletter.dateSent).toISOString().slice(0, 10) : ''}
+          onChange={(e) => setNewsletter((prev) => ({ ...prev, dateSent: e.target.value }))}
+          size="small"
+          InputLabelProps={{ shrink: true }}
+        />
       </Box>
       <EmailEditor
         ref={emailEditorRef}
