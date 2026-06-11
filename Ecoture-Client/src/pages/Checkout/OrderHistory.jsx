@@ -25,11 +25,18 @@ function OrderHistory() {
     ])
       .then(([ordersRes, refundsRes]) => {
         setOrders(ordersRes.data);
+        const allItemIds = ordersRes.data.flatMap(o => o.orderItems.map(i => i.id));
+        console.log("DEBUG order item ids:", allItemIds);
+        console.log("DEBUG refunds:", JSON.stringify(refundsRes.data));
         const statusMap = {};
         refundsRes.data.forEach(r => { statusMap[r.orderItemId] = r.status; });
+        console.log("DEBUG statusMap:", JSON.stringify(statusMap));
         setRefundStatusMap(statusMap);
       })
-      .catch(() => alert("Failed to fetch order history."))
+      .catch((err) => {
+        console.error("DEBUG fetch error:", err);
+        alert("Failed to fetch order history.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
