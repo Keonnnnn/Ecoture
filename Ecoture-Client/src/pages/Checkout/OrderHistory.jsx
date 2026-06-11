@@ -119,9 +119,10 @@ function OrderHistory() {
                       variant="outlined" 
                       color="error" 
                       sx={{ mt: 1 }} 
-                      onClick={() => { 
-                        setSelectedItem(item); 
-                        setRefundDialog(true); 
+                      onClick={() => {
+                        console.log("DEBUG selectedItem:", JSON.stringify(item));
+                        setSelectedItem(item);
+                        setRefundDialog(true);
                       }}
                     >
                       Request Refund

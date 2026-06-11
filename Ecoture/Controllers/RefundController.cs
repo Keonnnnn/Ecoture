@@ -37,13 +37,21 @@ namespace Ecoture.Controllers
             int userId = GetUserId();
             Console.WriteLine($"User ID from token: {userId}");
 
+            // Debug: log all order item IDs for this user
+            var userOrderItemIds = _context.OrderItems
+                .Join(_context.Orders, oi => oi.OrderId, o => o.Id, (oi, o) => new { oi.Id, o.UserId })
+                .Where(x => x.UserId == userId)
+                .Select(x => x.Id)
+                .ToList();
+            Console.WriteLine($"DEBUG: Received OrderItemId={requestDto.OrderItemId}, user {userId} owns item IDs=[{string.Join(",", userOrderItemIds)}]");
+
             // Fetch the order item
             var orderItem = _context.OrderItems.FirstOrDefault(o => o.Id == requestDto.OrderItemId);
 
             if (orderItem == null)
             {
                 Console.WriteLine($"❌ OrderItemId {requestDto.OrderItemId} not found.");
-                return NotFound(new { message = "Order item not found." });
+                return NotFound(new { message = $"Order item not found. Received ID={requestDto.OrderItemId}. Your item IDs=[{string.Join(",", userOrderItemIds)}]" });
             }
 
             // Verify the order belongs to this user
@@ -51,7 +59,7 @@ namespace Ecoture.Controllers
             if (order == null)
             {
                 Console.WriteLine($"❌ Order {orderItem.OrderId} not owned by user {userId}.");
-                return NotFound(new { message = "Order not found or not owned by user." });
+                return NotFound(new { message = $"Order {orderItem.OrderId} not owned by user {userId}." });
             }
 
             // ✅ Create refund request
