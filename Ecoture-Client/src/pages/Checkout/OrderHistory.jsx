@@ -35,7 +35,7 @@ function OrderHistory() {
     }
 
     const requestData = {
-      orderItemId: selectedItem.productId,  
+      orderItemId: selectedItem.id,
       reason: refundReason,
       status: "Pending"
     };
