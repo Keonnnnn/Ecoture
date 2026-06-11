@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Card, CardContent, CardActions, Typography, Grid, Button, } from '@mui/material';
+import { Alert, Box, Card, CardContent, CardActions, CircularProgress, Snackbar, Typography, Grid, Button } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import http from 'utils/http';
 import EmailEditor from 'react-email-editor';
 
@@ -8,6 +9,8 @@ function Newsletter() {
   const navigate = useNavigate();
   const [newsletters, setNewsletters] = useState([]);
   const editorRef = useRef(null);
+  const [sending, setSending] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const getEmailList = async () => {
     try {
@@ -21,23 +24,14 @@ function Newsletter() {
   };
 
   const sendEmails = async (id, subject, template) => {
+    setSending(id);
     const recipientEmails = await getEmailList();
+    const payload = { recipientEmails, subject, template };
 
-    const payload = {
-      recipientEmails: recipientEmails,
-      subject: subject,
-      template: template
-    };
-  
     await http.post(`/newsletter/send/${id}`, payload)
-      .then(async (res) => {
-        console.log(res);
-        alert("Emails sent!");
-      })
-      .catch(error => {
-        console.error("Error sending emails:", error);
-        alert("Failed to send emails. Please try again.");
-      });
+      .then(() => setSnackbar({ open: true, message: 'Newsletter sent successfully!', severity: 'success' }))
+      .catch(() => setSnackbar({ open: true, message: 'Failed to send newsletter. Please try again.', severity: 'error' }))
+      .finally(() => setSending(null));
   };
 
   // Convert a single JSON design to HTML using the hidden editor
@@ -151,14 +145,32 @@ function Newsletter() {
                 <Button
                   variant="contained"
                   color="primary"
+                  disabled={sending === nl.issueId}
+                  startIcon={sending === nl.issueId ? <CircularProgress size={16} color="inherit" /> : null}
                   onClick={() => sendEmails(nl.issueId, nl.issueTitle, nl.html)}>
-                  Send
+                  {sending === nl.issueId ? 'Sending...' : 'Send'}
                 </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          icon={snackbar.severity === 'success' ? <CheckCircleOutlineIcon /> : undefined}
+          sx={{ width: '100%', fontSize: '1rem' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
