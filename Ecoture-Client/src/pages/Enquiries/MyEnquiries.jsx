@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Typography, Card, CardContent, Chip, Divider } from "@mui/material";
+import { Box, Typography, Card, CardContent, Chip, Divider, TextField, Button } from "@mui/material";
 import http from "utils/http";
 import UserContext from "contexts/UserContext";
 
@@ -10,6 +10,8 @@ function MyEnquiries() {
   const { user } = useContext(UserContext);
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [replyText, setReplyText] = useState({});
+  const [submitting, setSubmitting] = useState({});
 
   useEffect(() => {
     if (!user?.email) return;
@@ -18,6 +20,26 @@ function MyEnquiries() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const handleReply = (enquiryId) => {
+    const message = replyText[enquiryId]?.trim();
+    if (!message) return;
+
+    setSubmitting((prev) => ({ ...prev, [enquiryId]: true }));
+    http.post("/Response", { enquiryId, message })
+      .then((res) => {
+        setEnquiries((prev) =>
+          prev.map((enq) =>
+            enq.enquiryId === enquiryId
+              ? { ...enq, responses: [...(enq.responses || []), res.data] }
+              : enq
+          )
+        );
+        setReplyText((prev) => ({ ...prev, [enquiryId]: "" }));
+      })
+      .catch(() => alert("Failed to send reply."))
+      .finally(() => setSubmitting((prev) => ({ ...prev, [enquiryId]: false })));
+  };
 
   if (loading) return <Typography sx={{ mt: 4, textAlign: "center" }}>Loading...</Typography>;
 
@@ -30,6 +52,7 @@ function MyEnquiries() {
       ) : (
         enquiries.map((enq) => {
           const status = statusLabel[enq.status] ?? "Open";
+          const isOpen = status !== "Closed";
           return (
             <Card key={enq.enquiryId} sx={{ mb: 3, boxShadow: 2, borderRadius: 2 }}>
               <CardContent>
@@ -58,9 +81,34 @@ function MyEnquiries() {
                 )}
 
                 {(!enq.responses || enq.responses.length === 0) && (
-                  <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                  <Typography variant="body2" color="text.secondary" fontStyle="italic" mb={1}>
                     No response yet.
                   </Typography>
+                )}
+
+                {isOpen && (
+                  <>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" fontWeight="bold" mb={1}>Send a follow-up:</Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      placeholder="Type your message..."
+                      value={replyText[enq.enquiryId] || ""}
+                      onChange={(e) => setReplyText((prev) => ({ ...prev, [enq.enquiryId]: e.target.value }))}
+                      sx={{ mb: 1 }}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={submitting[enq.enquiryId] || !replyText[enq.enquiryId]?.trim()}
+                      onClick={() => handleReply(enq.enquiryId)}
+                      sx={{ bgcolor: "#3E3E3E", "&:hover": { bgcolor: "#555" } }}
+                    >
+                      {submitting[enq.enquiryId] ? "Sending..." : "Send"}
+                    </Button>
+                  </>
                 )}
               </CardContent>
             </Card>
