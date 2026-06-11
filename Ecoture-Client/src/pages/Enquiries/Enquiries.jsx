@@ -7,10 +7,14 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Divider,
   Grid,
   Typography,
 } from '@mui/material';
+
+const statusColor = { Open: 'warning', Closed: 'success', InProgress: 'info' };
+const statusLabel = { Open: 'Open', Closed: 'Closed', InProgress: 'In Progress' };
 
 function Enquiries() {
   const navigate = useNavigate();
@@ -63,16 +67,16 @@ function Enquiries() {
                 }}
               >
                 <CardContent>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: '#333',
-                    }}
-                  >
-                    {enquiry.subject}
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
+                      {enquiry.subject}
+                    </Typography>
+                    <Chip
+                      label={statusLabel[enquiry.status] ?? enquiry.status}
+                      color={statusColor[enquiry.status] ?? 'default'}
+                      size="small"
+                    />
+                  </Box>
                   <Typography
                     variant="body2"
                     sx={{
@@ -81,15 +85,6 @@ function Enquiries() {
                     }}
                   >
                     Email: {enquiry.email}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mb: 1,
-                      color: 'gray',
-                    }}
-                  >
-                    Status: {enquiry.status}
                   </Typography>
                   <Typography
                     variant="body2"
