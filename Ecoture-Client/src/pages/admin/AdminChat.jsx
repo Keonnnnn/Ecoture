@@ -79,6 +79,44 @@ const AdminChat = () => {
       setOnlineUsers(Array.from(connections));
     });
 
+    // Receive messages that were sent while admin was offline
+    conn.on('PendingMessages', (pendingMessages) => {
+      setMessages((prev) => {
+        const updated = { ...prev };
+        for (const [sender, msgs] of Object.entries(pendingMessages)) {
+          const formatted = msgs.map((m) => ({
+            user: m.sender,
+            message: m.message,
+            timestamp: m.timestamp,
+          }));
+          updated[sender] = [...(prev[sender] || []), ...formatted];
+          localStorage.setItem(
+            `chatMessages_${sender}`,
+            JSON.stringify(updated[sender])
+          );
+        }
+        return updated;
+      });
+
+      setUsers((prev) => {
+        const newSenders = Object.keys(pendingMessages).filter(
+          (s) => !prev.includes(s)
+        );
+        if (newSenders.length === 0) return prev;
+        const next = [...prev, ...newSenders];
+        localStorage.setItem('adminChatUsers', JSON.stringify(next));
+        return next;
+      });
+
+      setUnreadCounts((prev) => {
+        const next = { ...prev };
+        for (const [sender, msgs] of Object.entries(pendingMessages)) {
+          next[sender] = (next[sender] || 0) + msgs.length;
+        }
+        return next;
+      });
+    });
+
     // Hub mirrors the auto-welcome message back so admin sees it in the chat window
     conn.on('AdminMessageSent', (targetUsername, msg) => {
       const timestamp = new Date().toISOString();
@@ -117,6 +155,7 @@ const AdminChat = () => {
       conn.off('ReceiveMessage');
       conn.off('Connections');
       conn.off('AdminMessageSent');
+      conn.off('PendingMessages');
       if (conn.state !== signalR.HubConnectionState.Disconnected) {
         conn.stop().catch((err) => console.error('⚠️ Error stopping connection:', err));
       }

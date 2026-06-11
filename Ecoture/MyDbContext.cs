@@ -74,6 +74,7 @@ namespace Ecoture
         public required DbSet<Referral> Referrals { get; set; }
         public required DbSet<Reward> Rewards { get; set; }
         public DbSet<EmailList> EmailLists{ get; set; }
+        public required DbSet<LivechatMessages> LivechatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

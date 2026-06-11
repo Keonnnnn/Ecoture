@@ -1,12 +1,23 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Ecoture.Model.Entity;
 
 namespace Ecoture.Hubs
 {
     public class ChatHub : Hub
     {
         private static Dictionary<string, string> userConnections = new Dictionary<string, string>();
+
+        private readonly IServiceScopeFactory _scopeFactory;
+
+        public ChatHub(IServiceScopeFactory scopeFactory)
+        {
+            _scopeFactory = scopeFactory;
+        }
 
         public override async Task OnConnectedAsync()
         {
@@ -18,16 +29,44 @@ namespace Ecoture.Hubs
 
             userConnections[userId] = Context.ConnectionId;
 
-            // Send updated list to ALL clients including the one just connected
+            // Send updated connection list to all clients
             await Clients.All.SendAsync("Connections", userConnections.Keys);
 
-            // Welcome message only for non-admin users
-            if (userId != "Admin")
+            if (userId == "Admin")
             {
+                // Push any messages that arrived while admin was offline
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
+                var pending = await db.LivechatMessages
+                    .Where(m => !m.IsDelivered)
+                    .OrderBy(m => m.Timestamp)
+                    .ToListAsync();
+
+                if (pending.Any())
+                {
+                    var grouped = pending
+                        .GroupBy(m => m.Sender)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(m => new { sender = m.Sender, message = m.Message, timestamp = m.Timestamp }).ToList()
+                        );
+
+                    await Clients.Caller.SendAsync("PendingMessages", grouped);
+
+                    foreach (var msg in pending)
+                        msg.IsDelivered = true;
+
+                    await db.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                // Welcome message for customers/guests
                 var welcomeMsg = "Hi, welcome to Ecoture live chat. How may I help you today?";
                 await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Admin", welcomeMsg);
 
-                // Mirror welcome to admin so it appears in their chat window for this user
+                // Mirror welcome to admin so it appears in their chat window
                 if (userConnections.TryGetValue("Admin", out string adminConnId))
                 {
                     await Clients.Client(adminConnId).SendAsync("AdminMessageSent", userId, welcomeMsg);
@@ -39,6 +78,19 @@ namespace Ecoture.Hubs
 
         public async Task SendMessage(string user, string message)
         {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
+            var chatMsg = new LivechatMessages
+            {
+                Sender = user,
+                Message = message,
+                Timestamp = DateTime.UtcNow,
+                IsDelivered = userConnections.ContainsKey("Admin")
+            };
+            db.LivechatMessages.Add(chatMsg);
+            await db.SaveChangesAsync();
+
             await Clients.Others.SendAsync("ReceiveMessage", user, message);
         }
 
@@ -50,7 +102,6 @@ namespace Ecoture.Hubs
             }
             else
             {
-                // If the user is not connected, notify the admin
                 await Clients.Caller.SendAsync("ReceiveMessage", "System", $"User {targetUser} is not online.");
             }
         }
