@@ -1,13 +1,74 @@
-#### README
-### Steps to move from your own branch into main using Github Desktop
-1. Fetch and pull origin
-2. Make sure to merge main into your current branch first and fix conflicts (if any).
-3. Once merged successfully, push to your own branch.
-4. Create a pull request using (https://github.com/franfranyeo/Ecoture/compare) and set base: main and compare: <your-branch>
-5. Create the PR and view the affected files in the 'Files changed' tab to see the changes you made to the code.
-6. Once everything is checked, merge the PR into main branch.
+# Ecoture — Full-Stack E-Commerce Platform
 
-### NOTE
-Please update your branch frequently and keep it in sync with the main branch from time to time, so you won't have to deal with a huge mess when you try to merge your code (day 1 + your changes) into the latest main (day 5000 + everyone's changes). It will practically be impossible to do so because of how big the difference will be.
+A fashion e-commerce web app built with React and .NET 8, featuring product browsing, cart & checkout, live chat support, a loyalty rewards system, and an admin dashboard.
 
-Thank you - :D
+**Live site:** https://ecoture.keonshu.com
+
+> **Note:** The backend is hosted on a free-tier server that sleeps after inactivity. The first request after a period of inactivity may take **15–20 seconds** to respond while the server wakes up. Subsequent requests will be fast.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + Vite, Material UI v6, React Router v6 |
+| Backend | ASP.NET Core 8 (.NET 8) |
+| Database | PostgreSQL (via Entity Framework Core) |
+| Real-time | SignalR (live chat) |
+| Auth | JWT Bearer tokens + 2FA (Twilio) |
+| Storage | Cloudinary (product images) |
+| Payments | Stripe (card processing) |
+
+---
+
+## Features
+
+- **Product catalogue** — browsing, filtering by category / colour / size / fit / price, search
+- **Cart & checkout** — multi-step checkout flow with address and payment management
+- **Live chat** — real-time customer ↔ admin chat with offline message persistence
+- **Loyalty programme** — points, tiers (Bronze / Silver / Gold), rewards redemption
+- **Wishlist & reviews** — per-user wishlist, product reviews with ratings
+- **Newsletter** — admin can create and send marketing emails
+- **Enquiries** — customers raise support enquiries; staff respond in-app
+- **Refund requests** — customers submit refunds; admin approves or rejects
+- **Admin dashboard** — manage users, products, rewards, enquiries, refunds, live chat, and newsletters
+- **Mobile-responsive** — optimised for phones and tablets across all customer and admin views
+
+---
+
+## Running Locally
+
+### Prerequisites
+- Node.js 18+
+- .NET 8 SDK
+- PostgreSQL
+
+### Frontend
+```bash
+cd Ecoture-Client
+npm install
+npm run dev
+```
+
+### Backend
+```bash
+cd Ecoture
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+
+Create an `appsettings.Development.json` (or update `appsettings.json`) with your connection string, JWT secret, Cloudinary credentials, and Twilio keys.
+
+---
+
+## Git Workflow (Team)
+
+1. **Fetch and pull** origin before starting work.
+2. **Merge main into your branch** first and resolve any conflicts.
+3. **Push** to your own branch.
+4. Open a **Pull Request** at https://github.com/Keonnnnn/Ecoture/compare — set `base: main`, `compare: <your-branch>`.
+5. Review the **Files changed** tab, then merge when ready.
+
+> Keep your branch in sync with main regularly — large divergences make merges painful.

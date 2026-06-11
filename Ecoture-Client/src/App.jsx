@@ -9,7 +9,7 @@ import {
 import { ToastContainer } from 'react-toastify';
 import http from 'utils/http';
 
-import { Box } from '@mui/material';
+import { Alert, Box, Snackbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -83,6 +83,14 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const isFirstLoad = useRef(true); // tracks first load to avoid API call
+
+  // Show once per browser session — server cold-start warning
+  const [showStartupAlert, setShowStartupAlert] = useState(
+    () => !sessionStorage.getItem('startupAlertShown')
+  );
+  useEffect(() => {
+    if (showStartupAlert) sessionStorage.setItem('startupAlertShown', 'true');
+  }, []);
 
   // Retrieve user data from localStorage (if available)
   useEffect(() => {
@@ -210,6 +218,21 @@ function App() {
         <Router>
           <ThemeProvider theme={MyTheme}>
             <ToastContainer />
+            <Snackbar
+              open={showStartupAlert}
+              autoHideDuration={8000}
+              onClose={() => setShowStartupAlert(false)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+              <Alert
+                onClose={() => setShowStartupAlert(false)}
+                severity="info"
+                variant="filled"
+                sx={{ width: '100%', maxWidth: 500 }}
+              >
+                The server may take <strong>15–20 seconds</strong> to respond on first load as it wakes up. Thank you for your patience!
+              </Alert>
+            </Snackbar>
             <Box
               sx={{
                 display: 'flex',
