@@ -32,16 +32,13 @@ const Chat = () => {
                     .then(() => console.log(`📢 Disconnected from server as ${currentUserId}`))
                     .catch(err => console.error("⚠️ Error notifying server about disconnection:", err));
                 connection.stop().then(() => {
-                    console.log("🔴 Previous connection stopped");
                     setConnection(null);
                     setMessages([]);
-                    localStorage.removeItem(`chatMessages_${currentUserId}`);
                     setCurrentUserId(newUserId);
                     setupConnection(newUserId);
                 });
             } else {
                 setMessages([]);
-                localStorage.removeItem(`chatMessages_${currentUserId}`);
                 setCurrentUserId(newUserId);
                 setupConnection(newUserId);
             }
@@ -51,7 +48,6 @@ const Chat = () => {
     const setupConnection = async (userId) => {
         if (connection) {
             await connection.stop();
-            console.log("🔴 Stopped previous connection before new setup");
         }
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${import.meta.env.VITE_API_BASE_URL}/chatHub?username=${userId}`, {
@@ -60,39 +56,37 @@ const Chat = () => {
             .withAutomaticReconnect()
             .build();
 
+        // Load history into state BEFORE start so it's available when welcome arrives
+        const savedMessages = JSON.parse(localStorage.getItem(`chatMessages_${userId}`)) || [];
+        setMessages(Array.isArray(savedMessages) ? savedMessages : []);
+
+        // Register handlers BEFORE start — server sends welcome during OnConnectedAsync,
+        // which fires the moment start() resolves, before any post-start code runs
+        newConnection.on("ReceiveMessage", (senderId, receivedMessage) => {
+            if (senderId !== "System") {
+                setMessages(prevMessages => {
+                    const isDuplicate = prevMessages.some(
+                        msg => msg.userId === senderId && msg.message === receivedMessage
+                    );
+                    if (!isDuplicate) {
+                        const updatedMessages = [...prevMessages, { userId: senderId, message: receivedMessage, timestamp: new Date().toISOString() }];
+                        localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updatedMessages));
+                        return updatedMessages;
+                    }
+                    return prevMessages;
+                });
+            }
+        });
+
+        newConnection.on("Connections", (connections) => {
+            setConnectedUsers(connections);
+        });
+
         try {
             await newConnection.start();
-            console.log(`🟢 Connected as ${userId}`);
-            const savedMessages = JSON.parse(localStorage.getItem(`chatMessages_${userId}`)) || [];
-            setMessages(Array.isArray(savedMessages) ? savedMessages : []);
-
-            newConnection.off("ReceiveMessage");
-            newConnection.off("Connections");
-
-            newConnection.on("ReceiveMessage", (senderId, receivedMessage) => {
-                if (senderId !== "System") {
-                    setMessages(prevMessages => {
-                        const isDuplicate = prevMessages.some(
-                            msg => msg.userId === senderId && msg.message === receivedMessage
-                        );
-                        if (!isDuplicate) {
-                            const updatedMessages = [...prevMessages, { userId: senderId, message: receivedMessage, timestamp: new Date().toISOString() }];
-                            localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updatedMessages));
-                            return updatedMessages;
-                        }
-                        return prevMessages;
-                    });
-                }
-            });
-
-            newConnection.on("Connections", (connections) => {
-                console.log("Updated connected users:", connections);
-                setConnectedUsers(connections);
-            });
-
             setConnection(newConnection);
         } catch (error) {
-            console.error("⚠️ Error connecting to SignalR:", error);
+            console.error("Error connecting to SignalR:", error);
         }
     };
 
