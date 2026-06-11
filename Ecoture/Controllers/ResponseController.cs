@@ -3,17 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Ecoture.Model.DTO;
 using Ecoture.Model.Entity;
 using Ecoture.Model.Request;
+using Ecoture.Services;
 using AutoMapper;
 
 namespace Ecoture.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
-	public class ResponseController(MyDbContext context, IMapper mapper, ILogger<ResponseController> logger) : ControllerBase
+	public class ResponseController(MyDbContext context, IMapper mapper, ILogger<ResponseController> logger, IEmailService emailService) : ControllerBase
 	{
 		private readonly MyDbContext _context = context;
 		private readonly IMapper _mapper = mapper;
 		private readonly ILogger<ResponseController> _logger = logger;
+		private readonly IEmailService _emailService = emailService;
 
 		[HttpGet]
 		[ProducesResponseType(typeof(IEnumerable<ResponseDTO>), StatusCodes.Status200OK)]
@@ -45,7 +47,7 @@ namespace Ecoture.Controllers
 
 		[HttpPost]
 		[ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status200OK)]
-		public IActionResult AddResponse(AddResponse responseRequest)
+		public async Task<IActionResult> AddResponse(AddResponse responseRequest)
 		{
 			try
 			{
@@ -59,15 +61,31 @@ namespace Ecoture.Controllers
 				var newResponse = new Response
 				{
 					enquiryId = responseRequest.EnquiryId,
-					csoId = 0, 
+					csoId = 0,
 					message = responseRequest.Message.Trim(),
 					responseDate = now
 				};
 
 				_context.Responses.Add(newResponse);
-
 				enquiry.updatedAt = now;
 				_context.SaveChanges();
+
+				// Email the customer with the admin's response
+				await _emailService.SendAsync(
+					enquiry.email,
+					$"Response to your enquiry: {enquiry.subject}",
+					$@"<html><body style='font-family:Arial,sans-serif;color:#333'>
+						<h2>We've responded to your enquiry</h2>
+						<p><strong>Subject:</strong> {enquiry.subject}</p>
+						<p><strong>Your message:</strong><br/>{enquiry.message}</p>
+						<hr/>
+						<p><strong>Our response:</strong><br/>{responseRequest.Message.Trim()}</p>
+						<br/>
+						<p>You can view all your enquiries at <a href='https://ecoture.keonshu.com/my-enquiries'>ecoture.keonshu.com/my-enquiries</a>.</p>
+						<br/>
+						<p>Thank you,<br/><strong>The Ecoture Team</strong></p>
+					</body></html>"
+				);
 
 				var responseDTO = _mapper.Map<ResponseDTO>(newResponse);
 				return Ok(responseDTO);

@@ -396,6 +396,9 @@ function Navbar() {
                     <MenuItem onClick={() => handleNavigate('/refund-requests')}>
                      Refund Status
                     </MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/my-enquiries')}>
+                     My Enquiries
+                    </MenuItem>
                     {adminRoles.includes(user?.role) && (
                       <MenuItem
                         onClick={() => handleNavigate('/admin/settings')}

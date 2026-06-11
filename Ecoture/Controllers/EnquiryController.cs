@@ -61,6 +61,25 @@ namespace Ecoture.Controllers
 			}
 		}
 
+		[HttpGet("my")]
+		public IActionResult GetMyEnquiries([FromQuery] string email)
+		{
+			try
+			{
+				var enquiries = _context.Enquiries
+					.Include(e => e.Responses)
+					.Where(e => e.email == email)
+					.OrderByDescending(e => e.createdAt)
+					.ToList();
+				return Ok(enquiries.Select(_mapper.Map<EnquiryDTO>));
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error fetching enquiries for customer");
+				return StatusCode(500);
+			}
+		}
+
 		[HttpGet("Summary")]
 		public IActionResult GetEnquirySummary()
 		{

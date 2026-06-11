@@ -38,6 +38,7 @@ import RefundRequests from './pages/Checkout/Refund';
 import CustomerLanding from './pages/CustomerLanding';
 import EditProduct from './pages/EditProduct';
 import AddEnquiry from './pages/Enquiries/AddEnquiry';
+import MyEnquiries from './pages/Enquiries/MyEnquiries';
 import ManageEnquiry from './pages/Enquiries/AddResponse';
 import EnquiriesDashboard from './pages/Enquiries/Dashboard';
 // Amelia Imports
@@ -303,6 +304,7 @@ function App() {
                   <Route path="/dashboard" element={<EnquiriesDashboard />} />
                   <Route path="/enquiries" element={<Enquiries />} />
                   <Route path="/addenquiry" element={<AddEnquiry />} />
+                  <Route path="/my-enquiries" element={<MyEnquiries />} />
                   <Route
                     path="/manageenquiry/:id"
                     element={<ManageEnquiry />}
