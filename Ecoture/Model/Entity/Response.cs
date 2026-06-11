@@ -20,6 +20,8 @@ namespace Ecoture.Model.Entity
 		public string message { get; set; } = string.Empty; 
 
 		[Column(TypeName = "timestamp with time zone")]
-		public DateTime responseDate { get; set; } 
+		public DateTime responseDate { get; set; }
+
+		public bool isCustomerReply { get; set; } = false;
 	}
 }

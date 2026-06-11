@@ -9,6 +9,8 @@ namespace Ecoture.Model.Request
 
 		[Required]
 		[MaxLength(1000)]
-		public string Message { get; set; } = string.Empty; // Response message
+		public string Message { get; set; } = string.Empty;
+
+		public bool IsCustomerReply { get; set; } = false;
 	}
 }

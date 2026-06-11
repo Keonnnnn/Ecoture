@@ -63,7 +63,8 @@ namespace Ecoture.Controllers
 					enquiryId = responseRequest.EnquiryId,
 					csoId = 0,
 					message = responseRequest.Message.Trim(),
-					responseDate = now
+					responseDate = now,
+					isCustomerReply = responseRequest.IsCustomerReply
 				};
 
 				_context.Responses.Add(newResponse);

@@ -26,7 +26,7 @@ function MyEnquiries() {
     if (!message) return;
 
     setSubmitting((prev) => ({ ...prev, [enquiryId]: true }));
-    http.post("/Response", { enquiryId, message })
+    http.post("/Response", { enquiryId, message, isCustomerReply: true })
       .then((res) => {
         setEnquiries((prev) =>
           prev.map((enq) =>
@@ -70,11 +70,30 @@ function MyEnquiries() {
                     <Divider sx={{ mb: 2 }} />
                     <Typography variant="subtitle2" fontWeight="bold" mb={1}>Responses:</Typography>
                     {enq.responses.map((r) => (
-                      <Box key={r.responseId} sx={{ bgcolor: "#f5f5f5", borderRadius: 1, p: 2, mb: 1 }}>
-                        <Typography variant="body2">{r.message}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(r.responseDate).toLocaleString()}
+                      <Box
+                        key={r.responseId}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: r.isCustomerReply ? "flex-end" : "flex-start",
+                          mb: 1,
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.3 }}>
+                          {r.isCustomerReply ? "You" : "Ecoture Support"}
                         </Typography>
+                        <Box sx={{
+                          bgcolor: r.isCustomerReply ? "#3E3E3E" : "#f0f0f0",
+                          color: r.isCustomerReply ? "#fff" : "inherit",
+                          borderRadius: 2,
+                          p: "10px 14px",
+                          maxWidth: "80%",
+                        }}>
+                          <Typography variant="body2">{r.message}</Typography>
+                          <Typography variant="caption" sx={{ opacity: 0.65 }}>
+                            {new Date(r.responseDate).toLocaleString()}
+                          </Typography>
+                        </Box>
                       </Box>
                     ))}
                   </>
