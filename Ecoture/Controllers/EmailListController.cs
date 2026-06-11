@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Collections.Generic;
 using Ecoture.Model.Entity;
+using Ecoture.Services;
 
 namespace Ecoture.Controllers
 {
@@ -12,11 +13,13 @@ namespace Ecoture.Controllers
     {
         private readonly MyDbContext _context;
         private readonly ILogger<EmailListController> _logger;
+        private readonly IEmailService _emailService;
 
-        public EmailListController(MyDbContext context, ILogger<EmailListController> logger)
+        public EmailListController(MyDbContext context, ILogger<EmailListController> logger, IEmailService emailService)
         {
             _context = context;
             _logger = logger;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -43,7 +46,7 @@ namespace Ecoture.Controllers
         }
 
         [HttpPost]
-        public IActionResult Subscribe([FromBody] EmailList emailEntry)
+        public async Task<IActionResult> Subscribe([FromBody] EmailList emailEntry)
         {
             try
             {
@@ -57,6 +60,18 @@ namespace Ecoture.Controllers
                 emailEntry.SubscribedAt = DateTime.UtcNow;
                 _context.EmailLists.Add(emailEntry);
                 _context.SaveChanges();
+
+                await _emailService.SendAsync(
+                    emailEntry.Email,
+                    "Welcome to Ecoture – You're subscribed!",
+                    @"<html><body style='font-family:Arial,sans-serif;color:#333'>
+                        <h2>Welcome to Ecoture! 🌿</h2>
+                        <p>Thank you for subscribing to our newsletter.</p>
+                        <p>You'll be the first to know about new arrivals, exclusive deals, and the latest fashion trends.</p>
+                        <br/>
+                        <p>Stay stylish,<br/><strong>The Ecoture Team</strong></p>
+                      </body></html>"
+                );
 
                 return Ok(new { message = "Successfully subscribed!" });
             }
