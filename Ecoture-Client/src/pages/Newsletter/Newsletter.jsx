@@ -144,11 +144,14 @@ function Newsletter() {
 
               <CardActions>
                 <Button
+                  variant="outlined"
+                  onClick={() => navigate(`/editnewsletter/${nl.issueId}`)}>
+                  Edit
+                </Button>
+                <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => {
-                    sendEmails(nl.issueId, nl.issueTitle, nl.html);
-                  }}>
+                  onClick={() => sendEmails(nl.issueId, nl.issueTitle, nl.html)}>
                   Send
                 </Button>
               </CardActions>

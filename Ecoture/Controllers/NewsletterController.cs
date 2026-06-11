@@ -52,6 +52,21 @@ namespace Ecoture.Controllers
             return Ok(newsletter);
         }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateNewsletter(int id, [FromBody] Newsletter updated)
+        {
+            var newsletter = _context.Newsletters.Find(id);
+            if (newsletter == null)
+                return NotFound();
+
+            newsletter.IssueTitle = updated.IssueTitle;
+            newsletter.NewsletterCategory = updated.NewsletterCategory;
+            newsletter.Template = updated.Template;
+            newsletter.HTML = updated.HTML;
+            _context.SaveChanges();
+            return Ok(newsletter);
+        }
+
         [HttpDelete("{id}")]
         public IActionResult DeleteNewsletter(int id)
         {

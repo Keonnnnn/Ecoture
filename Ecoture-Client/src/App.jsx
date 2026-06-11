@@ -46,6 +46,7 @@ import Enquiries from './pages/Enquiries/Enquiries';
 import UpdateEnquiry from './pages/Enquiries/UpdateEnquiry';
 // import AddNewsletter from './pages/Newsletter/AddNewsletter';
 import CreateNewsletter from './pages/Newsletter/CreateNewsletter';
+import EditNewsletter from './pages/Newsletter/EditNewsletter';
 import Newsletter from './pages/Newsletter/Newsletter';
 import SelectContent from './pages/Newsletter/SelectContent';
 import ProductDetail from './pages/ProductDetail';
@@ -317,6 +318,7 @@ function App() {
                     element={<CreateNewsletter />}
                   />
                   <Route path="/newsletter" element={<Newsletter />} />
+                  <Route path="/editnewsletter/:id" element={<EditNewsletter />} />
                   <Route path="/selectcontent" element={<SelectContent />} />
 
                   <Route
