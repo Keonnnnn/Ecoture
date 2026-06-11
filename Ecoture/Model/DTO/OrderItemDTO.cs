@@ -2,6 +2,7 @@
 {
     public class OrderItemDTO
     {
+        public int Id { get; set; }
         public int ProductId { get; set; }
         public required string ProductTitle { get; set; }
         public decimal Price { get; set; }
