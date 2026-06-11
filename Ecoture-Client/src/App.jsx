@@ -203,7 +203,7 @@ function App() {
   const isAdmin = user?.role === 'Admin';
   const isAdminRoute = window.location.pathname.startsWith('/admin');
   return (
-    <GoogleOAuthProvider clientId="455480585598-3f0qgcm01cbr2qp4rm9or035u1g75ur8.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="1079956042733-7oe8q2677v78brbf1l2mf9nr6p713civ.apps.googleusercontent.com">
       <UserContext.Provider value={value}>
         <Router>
           <ThemeProvider theme={MyTheme}>
