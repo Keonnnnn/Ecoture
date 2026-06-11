@@ -64,7 +64,7 @@ const sideMenuOptions = [
   {
     name: 'Newsletter',
     icon: usersIcon,
-    path: '/admin/newsletter/createnewsletter',
+    path: '/newsletter',
   }
 ];
 

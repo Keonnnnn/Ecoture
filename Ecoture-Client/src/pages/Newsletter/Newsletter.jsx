@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, CardActions, Typography, Grid, Button, } from '@mui/material';
 import http from 'utils/http';
 import EmailEditor from 'react-email-editor';
 
 function Newsletter() {
+  const navigate = useNavigate();
   const [newsletters, setNewsletters] = useState([]);
   const editorRef = useRef(null);
 
@@ -81,9 +83,12 @@ function Newsletter() {
 
   return (
     <Box sx={{ padding: '16px' }}>
-      <Typography variant="h4" gutterBottom>
-        Newsletters
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">Newsletters</Typography>
+        <Button variant="contained" onClick={() => navigate('/createnewsletter')}>
+          Create Newsletter
+        </Button>
+      </Box>
 
       {/* Hidden email editor for converting JSON -> HTML */}
       <div style={{ display: 'none' }}>
