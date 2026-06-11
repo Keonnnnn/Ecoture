@@ -49,6 +49,7 @@ function Home() {
               mb: 2,
               color: 'white',
               letterSpacing: '1px',
+              fontSize: { xs: '2rem', sm: '3rem', md: '3.75rem' },
             }}
           >
             Redefining Elegance
@@ -198,23 +199,34 @@ function Home() {
         <Typography variant="body1" sx={{ mb: 4, fontWeight: 400 }}>
           Be the first to know about exclusive drops and offers.
         </Typography>
-        <TextField
-          placeholder="Enter your email"
-          variant="outlined"
-          sx={{ width: '300px', mr: 2, fontFamily: 'inherit' }}
-        />
-        <Button
-          variant="contained"
+        <Box
           sx={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            fontFamily: 'inherit',
-            '&:hover': { backgroundColor: 'gray' },
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
           }}
         >
-          Subscribe
-        </Button>
+          <TextField
+            placeholder="Enter your email"
+            variant="outlined"
+            sx={{ width: { xs: '100%', sm: '300px' }, fontFamily: 'inherit' }}
+          />
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: 'black',
+              color: 'white',
+              padding: '10px 20px',
+              fontFamily: 'inherit',
+              width: { xs: '100%', sm: 'auto' },
+              '&:hover': { backgroundColor: 'gray' },
+            }}
+          >
+            Subscribe
+          </Button>
+        </Box>
       </Container>
 
       {/* Footer */}

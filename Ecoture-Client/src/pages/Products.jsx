@@ -313,18 +313,22 @@ function Products({ onAddProductClick }) {
       <Box
         sx={{
           display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
+          flexWrap: { xs: 'nowrap', md: 'wrap' },
+          overflowX: { xs: 'auto', md: 'visible' },
+          justifyContent: { xs: 'flex-start', md: 'center' },
           gap: 2,
           marginBottom: 3,
-          padding: '16px 24px',
+          padding: { xs: '12px 16px', md: '16px 24px' },
           backgroundColor: '#f9f9f9',
           borderRadius: '12px',
           boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+          '&::-webkit-scrollbar': { display: 'none' },
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
         }}
       >
         {/* Category Filter */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: { xs: 150, md: 200 }, flexShrink: 0 }}>
           <Typography
             variant="body2"
             sx={{
@@ -359,7 +363,7 @@ function Products({ onAddProductClick }) {
         </Box>
 
         {/* Color Filter */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: { xs: 150, md: 200 }, flexShrink: 0 }}>
           <Typography
             variant="body2"
             sx={{
@@ -400,7 +404,7 @@ function Products({ onAddProductClick }) {
         </Box>
 
         {/* Size Filter */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: { xs: 150, md: 200 }, flexShrink: 0 }}>
           <Typography
             variant="body2"
             sx={{
@@ -434,7 +438,7 @@ function Products({ onAddProductClick }) {
         </Box>
 
         {/* Fit Filter */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: { xs: 150, md: 200 }, flexShrink: 0 }}>
           <Typography
             variant="body2"
             sx={{
@@ -466,7 +470,7 @@ function Products({ onAddProductClick }) {
         </Box>
 
         {/* Price Filter */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: { xs: 150, md: 200 }, flexShrink: 0 }}>
           <Typography
             variant="body2"
             sx={{

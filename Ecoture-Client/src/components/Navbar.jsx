@@ -16,6 +16,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Drawer,
   IconButton,
   ListItem,
@@ -229,14 +230,6 @@ function Navbar() {
             ))}
           </Box>
 
-          {/* Mobile Menu Icon */}
-          <IconButton
-            sx={{ display: { xs: 'block', md: 'none' } }}
-            onClick={toggleDrawer}
-          >
-            <MenuIcon />
-          </IconButton>
-
           {/* Profile and Cart Section */}
           <Box
             sx={{
@@ -411,7 +404,7 @@ function Navbar() {
                 </>
               )}
               {!user && (
-                <Box sx={{ display: 'flex' }}>
+                <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
                   <Link to="/login" className="nav-link">
                     <Button variant="outlined">Login</Button>
                   </Link>
@@ -432,6 +425,14 @@ function Navbar() {
                   </Link>
                 </Box>
               )}
+
+              {/* Mobile hamburger — grouped with right-side icons */}
+              <IconButton
+                sx={{ display: { xs: 'flex', md: 'none' }, p: 0.5 }}
+                onClick={toggleDrawer}
+              >
+                <MenuIcon />
+              </IconButton>
             </div>
           </Box>
         </Toolbar>
@@ -456,6 +457,17 @@ function Navbar() {
               <ListItemText primary={item.text} />
             </ListItem>
           ))}
+          {!user && (
+            <>
+              <Divider />
+              <ListItem button component={Link} to="/login" onClick={toggleDrawer}>
+                <ListItemText primary="Login" />
+              </ListItem>
+              <ListItem button component={Link} to="/register" onClick={toggleDrawer}>
+                <ListItemText primary="Register" />
+              </ListItem>
+            </>
+          )}
         </Box>
       </Drawer>
     </AppBar>

@@ -114,4 +114,44 @@
     height: 16px; /* Smaller icons */
     margin-left: 5px;
   }
-  
+
+@media (max-width: 480px) {
+  .newsletter {
+    max-width: 100%;
+    border-radius: 0;
+    padding: 16px 12px;
+  }
+
+  .newsletter h3 {
+    font-size: 15px;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .newsletter-form input {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .newsletter-form button {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .footer-section {
+    flex: none;
+    width: 50%;
+    min-width: unset;
+    margin-bottom: 12px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+}
