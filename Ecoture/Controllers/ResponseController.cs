@@ -71,7 +71,9 @@ namespace Ecoture.Controllers
 				enquiry.updatedAt = now;
 				_context.SaveChanges();
 
-				// Email the customer with the admin's response
+				// Only email the customer when an admin/support adds a response
+				if (responseRequest.IsCustomerReply) return Ok(_mapper.Map<ResponseDTO>(newResponse));
+
 				await _emailService.SendAsync(
 					enquiry.email,
 					$"Response to your enquiry: {enquiry.subject}",
