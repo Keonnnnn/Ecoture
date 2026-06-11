@@ -133,18 +133,33 @@ function Enquiries() {
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   {enquiry.responses.length > 0 ? (
-                    enquiry.responses.map((response, index) => (
-                      <Typography
+                    enquiry.responses.map((response) => (
+                      <Box
                         key={response.responseId}
-                        variant="body2"
                         sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: response.isCustomerReply ? 'flex-end' : 'flex-start',
                           mb: 1,
-                          color: 'gray',
                         }}
                       >
-                        {index + 1}. {response.message} -{' '}
-                        {new Date(response.responseDate).toLocaleString()}
-                      </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.3 }}>
+                          {response.isCustomerReply ? enquiry.email : 'Support'}
+                        </Typography>
+                        <Box sx={{
+                          bgcolor: response.isCustomerReply ? '#e8f0fe' : '#f0f0f0',
+                          borderRadius: 2,
+                          p: '8px 12px',
+                          maxWidth: '85%',
+                        }}>
+                          <Typography variant="body2" sx={{ color: '#333' }}>
+                            {response.message}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(response.responseDate).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      </Box>
                     ))
                   ) : (
                     <Typography variant="body2" sx={{ color: 'gray' }}>
