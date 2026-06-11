@@ -64,7 +64,17 @@ const Chat = () => {
             await newConnection.start();
             console.log(`🟢 Connected as ${userId}`);
             const savedMessages = JSON.parse(localStorage.getItem(`chatMessages_${userId}`)) || [];
-            setMessages(Array.isArray(savedMessages) ? savedMessages : []);
+            if (Array.isArray(savedMessages) && savedMessages.length > 0) {
+                setMessages(savedMessages);
+            } else {
+                const welcome = [{
+                    userId: "Admin",
+                    message: "👋 Hi there! Welcome to Ecoture Support. How can we help you today?",
+                    timestamp: new Date().toISOString(),
+                }];
+                setMessages(welcome);
+                localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(welcome));
+            }
 
             newConnection.off("ReceiveMessage");
             newConnection.off("Connections");

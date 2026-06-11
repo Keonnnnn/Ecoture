@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useMediaQuery } from '@mui/material';
 import Chat from '../pages/LiveChat/Chat';
 
 const ChatWidget = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   return (
     <div>
@@ -11,8 +13,8 @@ const ChatWidget = () => {
           onClick={() => setIsChatOpen(true)}
           style={{
             position: 'fixed',
-            bottom: '20px',
-            right: '20px',
+            bottom: isMobile ? '16px' : '20px',
+            right: isMobile ? '16px' : '20px',
             backgroundColor: '#0056b3',
             color: 'white',
             padding: '12px 24px',
@@ -34,12 +36,13 @@ const ChatWidget = () => {
         style={{
           position: 'fixed',
           bottom: 0,
-          right: '20px',
-          width: '420px',
-          height: '480px',
+          right: isMobile ? 0 : '20px',
+          left: isMobile ? 0 : 'auto',
+          width: isMobile ? '100%' : '420px',
+          height: isMobile ? '75vh' : '480px',
           backgroundColor: 'white',
           boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
-          borderRadius: '10px',
+          borderRadius: isMobile ? '16px 16px 0 0' : '10px',
           display: isChatOpen ? 'flex' : 'none',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -50,11 +53,12 @@ const ChatWidget = () => {
           style={{
             backgroundColor: '#180D3B',
             color: 'white',
-            padding: '10px',
+            padding: '12px 16px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             fontWeight: 'bold',
+            flexShrink: 0,
           }}
         >
           Live Chat
@@ -64,8 +68,10 @@ const ChatWidget = () => {
               backgroundColor: 'transparent',
               border: 'none',
               color: 'white',
-              fontSize: '16px',
+              fontSize: '20px',
               cursor: 'pointer',
+              padding: '4px 8px',
+              lineHeight: 1,
             }}
           >
             ✖
