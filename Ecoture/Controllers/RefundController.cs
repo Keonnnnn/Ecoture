@@ -96,7 +96,9 @@ namespace Ecoture.Controllers
                     UserId = r.UserId,
                     Reason = r.Reason,
                     Status = r.Status,
-                    CreatedAt = r.CreatedAt
+                    CreatedAt = r.CreatedAt,
+                    ProductTitle = r.OrderItem.ProductTitle,
+                    ImageFile = r.OrderItem.ImageFile
                 });
 
             if (refund == null)

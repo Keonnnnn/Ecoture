@@ -8,28 +8,13 @@ function RefundRequests() {
   const navigate = useNavigate();
   const location = useLocation();
   const [refunds, setRefunds] = useState([]);
-  const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
   const { user } = useContext(UserContext);
   const userId = user.userId;
 
   useEffect(() => {
-    http.get(`/refund/${userId}`) 
-      .then((res) => {
-        setRefunds(res.data);
-        const productIds = res.data.map(refund => refund.orderItemId);
-
-        // Fetch product details for each refund request
-        Promise.all(productIds.map(id => http.get(`/product/${id}`)))
-          .then(responses => {
-            const productsData = {};
-            responses.forEach((res, index) => {
-              productsData[productIds[index]] = res.data;
-            });
-            setProducts(productsData);
-          })
-          .catch(() => alert("Failed to fetch product details."));
-      })
+    http.get(`/refund/${userId}`)
+      .then((res) => setRefunds(res.data))
       .catch(() => alert("Failed to fetch refund requests."))
       .finally(() => setLoading(false));
   }, []);
@@ -76,33 +61,30 @@ function RefundRequests() {
         <Typography>No refund requests found.</Typography>
       ) : (
         refunds.map((refund) => {
-          const product = products[refund.orderItemId];
-
-          // 🎨 Set the text color based on status
           let statusColor = "black";
           if (refund.status === "Approved") statusColor = "green";
           if (refund.status === "Rejected") statusColor = "red";
 
           return (
-            <Card 
-              key={refund.id} 
-              sx={{ 
-                mb: 4, 
-                p: 3, 
-                display: "flex", 
-                alignItems: "center", 
+            <Card
+              key={refund.id}
+              sx={{
+                mb: 4,
+                p: 3,
+                display: "flex",
+                alignItems: "center",
                 justifyContent: "space-between",
                 minHeight: 150,
-                borderRadius: 2, 
-                boxShadow: 2 
+                borderRadius: 2,
+                boxShadow: 2
               }}
             >
-              
+
               {/* Product Image */}
               <Box sx={{ display: "flex", alignItems: "center", width: "15%" }}>
                 <img
-                  src={product ? `${import.meta.env.VITE_FILE_BASE_URL}${product.imageFile}` : "/placeholder.png"}
-                  alt={product ? product.title : "Product Image"}
+                  src={refund.imageFile ? `${import.meta.env.VITE_FILE_BASE_URL}${refund.imageFile}` : "/placeholder.png"}
+                  alt={refund.productTitle || "Product Image"}
                   width="100"
                   height="100"
                   style={{ borderRadius: 8 }}
@@ -112,7 +94,7 @@ function RefundRequests() {
 
               {/* Refund Details */}
               <CardContent sx={{ flex: 1 }}>
-                <Typography variant="h6"><strong>{product ? product.title : "Product Not Found"}</strong></Typography>
+                <Typography variant="h6"><strong>{refund.productTitle || "Unknown Product"}</strong></Typography>
                 <Typography><strong>Reason:</strong> {refund.reason}</Typography>
                 <Typography><strong>Requested At:</strong> {new Date(refund.createdAt).toLocaleString()}</Typography>
               </CardContent>
