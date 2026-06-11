@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { 
-  Box, Typography, Card, CardContent, Button, 
-  Dialog, DialogTitle, DialogContent, TextField, DialogActions 
+import React, { useEffect, useState, useContext } from "react";
+import {
+  Box, Typography, Card, CardContent, Button,
+  Dialog, DialogTitle, DialogContent, TextField, DialogActions
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import http from "utils/http";
+import UserContext from "contexts/UserContext";
 
 function OrderHistory() {
   const navigate = useNavigate();
@@ -14,10 +15,20 @@ function OrderHistory() {
   const [refundDialog, setRefundDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [refundReason, setRefundReason] = useState("");
+  const [refundStatusMap, setRefundStatusMap] = useState({});
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
-    http.get("/order")
-      .then((res) => setOrders(res.data))
+    Promise.all([
+      http.get("/order"),
+      http.get(`/refund/${user.userId}`)
+    ])
+      .then(([ordersRes, refundsRes]) => {
+        setOrders(ordersRes.data);
+        const statusMap = {};
+        refundsRes.data.forEach(r => { statusMap[r.orderItemId] = r.status; });
+        setRefundStatusMap(statusMap);
+      })
       .catch(() => alert("Failed to fetch order history."))
       .finally(() => setLoading(false));
   }, []);
@@ -48,6 +59,7 @@ function OrderHistory() {
         alert("Refund request submitted successfully.");
         setRefundDialog(false);
         setRefundReason("");
+        setRefundStatusMap(prev => ({ ...prev, [selectedItem.id]: "Pending" }));
       })
       .catch((err) => {
         console.error("Refund Error:", err.response ? err.response.data : err);
@@ -115,18 +127,32 @@ function OrderHistory() {
                     <Typography>Color: {item.color} | Size: {item.size}</Typography>
                     <Typography>Quantity: {item.quantity}</Typography>
                     <Typography>${item.price.toFixed(2)}</Typography>
-                    <Button 
-                      variant="outlined" 
-                      color="error" 
-                      sx={{ mt: 1 }} 
-                      onClick={() => {
-                        console.log("DEBUG selectedItem:", JSON.stringify(item));
-                        setSelectedItem(item);
-                        setRefundDialog(true);
-                      }}
-                    >
-                      Request Refund
-                    </Button>
+                    {refundStatusMap[item.id] ? (
+                      <Typography
+                        sx={{
+                          mt: 1,
+                          fontWeight: "bold",
+                          color: refundStatusMap[item.id] === "Approved" ? "green"
+                               : refundStatusMap[item.id] === "Rejected" ? "red"
+                               : "orange"
+                        }}
+                      >
+                        Refund: {refundStatusMap[item.id]}
+                      </Typography>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        sx={{ mt: 1 }}
+                        onClick={() => {
+                          console.log("DEBUG selectedItem:", JSON.stringify(item));
+                          setSelectedItem(item);
+                          setRefundDialog(true);
+                        }}
+                      >
+                        Request Refund
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ))}
