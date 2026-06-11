@@ -104,7 +104,7 @@ function Newsletter() {
                   {nl.issueTitle}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Date Sent: {new Date(nl.dateSent).toLocaleDateString()}
+                  Date Created: {new Date(nl.dateCreated).toLocaleDateString()}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Category: {nl.newsletterCategory}

@@ -63,8 +63,8 @@ namespace Ecoture.Controllers
             newsletter.NewsletterCategory = updated.NewsletterCategory;
             newsletter.Template = updated.Template;
             newsletter.HTML = updated.HTML;
-            if (updated.DateSent != default)
-                newsletter.DateSent = DateTime.SpecifyKind(updated.DateSent, DateTimeKind.Utc);
+            if (updated.DateCreated != default)
+                newsletter.DateCreated = DateTime.SpecifyKind(updated.DateCreated, DateTimeKind.Utc);
             _context.SaveChanges();
             return Ok(newsletter);
         }

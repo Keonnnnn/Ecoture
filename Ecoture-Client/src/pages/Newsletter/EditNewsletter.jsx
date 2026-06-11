@@ -37,7 +37,7 @@ function EditNewsletter() {
         const payload = {
           IssueTitle: newsletter.issueTitle,
           NewsletterCategory: newsletter.newsletterCategory,
-          DateSent: newsletter.dateSent,
+          DateCreated: newsletter.dateCreated,
           Template: JSON.stringify(design),
           Html: html,
         };
@@ -76,8 +76,8 @@ function EditNewsletter() {
         <TextField
           label="Date"
           type="date"
-          value={newsletter.dateSent ? new Date(newsletter.dateSent).toISOString().slice(0, 10) : ''}
-          onChange={(e) => setNewsletter((prev) => ({ ...prev, dateSent: e.target.value }))}
+          value={newsletter.dateCreated ? new Date(newsletter.dateCreated).toISOString().slice(0, 10) : ''}
+          onChange={(e) => setNewsletter((prev) => ({ ...prev, dateCreated: e.target.value }))}
           size="small"
           InputLabelProps={{ shrink: true }}
         />
